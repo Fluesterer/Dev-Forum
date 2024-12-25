@@ -149,6 +149,31 @@
             border-radius: 10px;
         }
 
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: orange;
+            border-radius: 50%;
+            box-shadow: 0 0 20px yellow, 0 0 30px red;
+            animation: explosionEffect 0.5s ease-out forwards;
+        }
+
+        @keyframes explosionEffect {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -176,7 +201,8 @@
         let bossMeteor;
         let timer;
         let bossMeteorClicks = 0;
-
+        let aimbotTimer;
+        let godModeActive = false;
         const lifeBar = document.getElementById("life-bar");
         const gameOverText = document.getElementById("game-over");
         const tryAgainBtn = document.getElementById("try-again");
@@ -197,6 +223,7 @@
 
             meteor.addEventListener("click", function() {
                 meteor.remove();
+                createExplosion(meteor);
                 score++;
             });
 
@@ -218,6 +245,7 @@
 
             skull.addEventListener("click", function() {
                 skull.remove();
+                createExplosion(skull);
                 lives--;
                 updateLifeBar();
                 if (lives <= 0) {
@@ -231,6 +259,18 @@
                 skull.remove();
                 skulls = skulls.filter(s => s !== skull);
             }, 5000);
+        }
+
+        function createExplosion(element) {
+            const explosion = document.createElement("div");
+            explosion.classList.add("explosion");
+            explosion.style.left = `${element.offsetLeft - 15}px`;
+            explosion.style.top = `${element.offsetTop - 15}px`;
+            document.body.appendChild(explosion);
+
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
         }
 
         function spawnBossMeteor() {
@@ -289,39 +329,4 @@
         function spawnSkulls() {
             if (gameOver) return;
             createSkull();
-            setInterval(createSkull, 3000);  // Spawn a new skull every 3 seconds
-        }
-
-        function showSecretCode() {
-            if (gameOver) return;
-            document.getElementById("secret-code").style.display = "block";
-        }
-
-        function submitCode() {
-            const code = document.getElementById("code-input").value.trim();
-            if (code === "100373" && !bossActive) {
-                spawnBossMeteor();
-            } else if (code === "AboFluesterer") {
-                aimbotActive = true;
-                aimbotStatus.textContent = "Aimbot aktiviert!";
-                setTimeout(() => {
-                    aimbotActive = false;
-                    aimbotStatus.textContent = "";
-                }, 30000);
-            } else if (code === "G O D") {
-                lives = 5;
-                updateLifeBar();
-                aimbotActive = false;
-                aimbotStatus.textContent = "Godmode aktiviert!";
-            } else {
-                aimbotStatus.textContent = "Code ungültig!";
-            }
-            document.getElementById("code-input").value = "";
-        }
-
-        // Start the game
-        spawnMeteors();
-        spawnSkulls();
-    </script>
-</body>
-</html>
+            setInterval(createSkull, 3000);  // Spawn a new skull every 3
