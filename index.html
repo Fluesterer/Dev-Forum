@@ -175,6 +175,7 @@
         let aimbotActive = false;
         let bossMeteor;
         let timer;
+        let bossMeteorClicks = 0;
 
         const lifeBar = document.getElementById("life-bar");
         const gameOverText = document.getElementById("game-over");
@@ -233,7 +234,7 @@
         }
 
         function spawnBossMeteor() {
-            if (gameOver) return;
+            if (gameOver || bossActive) return;
             bossMeteor = document.createElement("div");
             bossMeteor.classList.add("boss-meteor");
             bossMeteor.textContent = "☄️";
@@ -241,9 +242,15 @@
             document.body.appendChild(bossMeteor);
 
             bossMeteor.addEventListener("click", function() {
-                bossMeteor.remove();
-                score++;
+                bossMeteorClicks++;
+                if (bossMeteorClicks >= 10) {
+                    bossMeteor.remove();
+                    score++;
+                    bossMeteorClicks = 0; // Reset for next round
+                }
             });
+
+            bossActive = true;
 
             setTimeout(() => {
                 bossMeteor.remove();
@@ -264,12 +271,13 @@
             lives = 5;
             score = 0;
             gameOver = false;
+            bossActive = false;
+            bossMeteorClicks = 0;
             gameOverText.style.display = "none";
             tryAgainBtn.style.display = "none";
             updateLifeBar();
             spawnMeteors();
             spawnSkulls();
-            spawnBossMeteor();
         }
 
         function spawnMeteors() {
@@ -291,7 +299,9 @@
 
         function submitCode() {
             const code = document.getElementById("code-input").value.trim();
-            if (code === "AboFluesterer") {
+            if (code === "100373" && !bossActive) {
+                spawnBossMeteor();
+            } else if (code === "AboFluesterer") {
                 aimbotActive = true;
                 aimbotStatus.textContent = "Aimbot aktiviert!";
                 setTimeout(() => {
@@ -300,29 +310,4 @@
                 }, 30000);
             } else if (code === "G O D") {
                 lives = 5;
-                updateLifeBar();
-                alert("Godmode aktiviert!");
-            } else {
-                alert("Code ungültig.");
-            }
-            document.getElementById("secret-code").style.display = "none";
-        }
-
-        setInterval(() => {
-            if (aimbotActive) {
-                meteors.forEach(meteor => {
-                    if (meteor.getBoundingClientRect().top > window.innerHeight / 2) {
-                        meteor.remove();
-                    }
-                });
-            }
-        }, 50);
-
-        window.onload = () => {
-            spawnMeteors();
-            spawnSkulls();
-            spawnBossMeteor();
-        };
-    </script>
-</body>
-</html>
+                update
