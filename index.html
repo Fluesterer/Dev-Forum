@@ -66,23 +66,7 @@
             transform: scale(1.1); /* Visuelles Feedback beim Überfahren */
         }
 
-        .meteor::after, .skull::after {
-            content: '';
-            position: absolute;
-            top: -10%;
-            left: -10%;
-            width: 120%; /* Größere Hitbox */
-            height: 120%;
-            border-radius: 50%;
-            background: transparent;
-        }
-
-        @keyframes fall {
-            from { top: -15%; }
-            to { top: 100%; }
-        }
-
-        .game-over {
+        #game-over {
             display: none;
             font-size: 6vw;
             color: #ff0000;
@@ -98,7 +82,8 @@
             background-color: #ff4500;
             border: none;
             border-radius: 10px;
-            margin-top: 20px;
+            margin: 20px auto;
+            width: 50%;
             cursor: pointer;
             text-shadow: 0 0 10px black, 0 0 15px black;
             transition: background-color 0.3s ease, transform 0.2s;
@@ -109,13 +94,49 @@
             background-color: #ff6347;
             transform: scale(1.1);
         }
+
+        #password-container {
+            margin-top: 20px;
+        }
+
+        #password {
+            font-size: 4vw;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            width: 60%;
+            text-align: center;
+            box-shadow: 0 0 10px #ffffff;
+        }
+
+        #submit-password {
+            font-size: 4vw;
+            padding: 10px 20px;
+            border: none;
+            background-color: #00ff00;
+            color: black;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            text-shadow: 0 0 10px #000;
+        }
+
+        #submit-password:hover {
+            background-color: #76ff03;
+        }
     </style>
 </head>
 <body>
     <h1>Meteoriten Zerstören!</h1>
     <div id="score">Punkte: 0</div>
     <div id="life-bar"><div id="life" class="life"></div></div>
-    <div id="game-over" class="game-over">
+
+    <div id="password-container">
+        <input type="text" id="password" placeholder="Passwort eingeben">
+        <button id="submit-password">Bestätigen</button>
+    </div>
+
+    <div id="game-over">
         Game Over! Deine Punktzahl: <span id="final-score"></span>
         <button id="try-again">Try Again</button>
     </div>
@@ -128,10 +149,14 @@
         let gameOverScreen = document.getElementById('game-over');
         let finalScore = document.getElementById('final-score');
         let tryAgainButton = document.getElementById('try-again');
-        let gameActive = true;
+        let passwordInput = document.getElementById('password');
+        let submitPassword = document.getElementById('submit-password');
+        let bigMeteorActive = false;
+        let bigMeteorUsed = false;
+        let aimbotActive = false;
 
         function createObject() {
-            if (!gameActive) return;
+            if (!gameActive || bigMeteorActive) return;
 
             const isSkull = Math.random() < 0.2;
             const object = document.createElement("div");
@@ -141,6 +166,10 @@
 
             object.style.left = `${Math.random() * (window.innerWidth - 80)}px`; // Bleibt im sichtbaren Bereich
             object.style.top = "-10%";
+
+            if (aimbotActive && !isSkull) {
+                setTimeout(() => object.click(), 200);
+            }
 
             object.addEventListener("click", function () {
                 object.remove();
@@ -182,6 +211,8 @@
         function resetGame() {
             score = 0;
             lives = 5;
+            aimbotActive = false;
+            bigMeteorUsed = false;
             gameActive = true;
             document.getElementById("score").innerText = `Punkte: ${score}`;
             lifeBar.style.width = "100%";
@@ -189,11 +220,46 @@
             spawnObjects();
         }
 
+        submitPassword.addEventListener("click", () => {
+            const password = passwordInput.value.trim();
+            if (password === "AboFluesterer") {
+                aimbotActive = true;
+                alert("Aimbot aktiviert!");
+            } else if (password === "100373" && !bigMeteorUsed) {
+                bigMeteorUsed = true;
+                bigMeteorActive = true;
+                spawnBigMeteor();
+            }
+            passwordInput.value = "";
+        });
+
+        function spawnBigMeteor() {
+            const bigMeteor = document.createElement("div");
+            bigMeteor.classList.add("meteor");
+            bigMeteor.innerText = "☄️";
+            bigMeteor.style.fontSize = "15vw";
+            bigMeteor.style.left = `${window.innerWidth / 2 - 100}px`;
+            bigMeteor.style.top = "20%";
+            document.body.appendChild(bigMeteor);
+
+            let clicks = 0;
+
+            bigMeteor.addEventListener("click", function () {
+                clicks++;
+                if (clicks >= 5) {
+                    bigMeteor.remove();
+                    lives++;
+                    updateLifeBar();
+                    bigMeteorActive = false;
+                }
+            });
+        }
+
         tryAgainButton.addEventListener("click", resetGame);
 
         function spawnObjects() {
             createObject();
-            meteorTimer = setInterval(createObject, 800); // Schnelleres Spawnen für mehr Objekte
+            meteorTimer = setInterval(createObject, 800);
         }
 
         window.onload = () => {
