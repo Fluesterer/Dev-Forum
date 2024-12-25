@@ -110,6 +110,20 @@
         #submit-password:hover {
             background-color: #76ff03;
         }
+
+        #password-error {
+            color: red;
+            font-size: 4vw;
+            margin-top: 10px;
+            text-shadow: 0 0 10px red;
+        }
+
+        #aimbot-timer {
+            font-size: 5vw;
+            margin-top: 10px;
+            color: yellow;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -122,7 +136,10 @@
     <div id="password-container">
         <input type="text" id="password" placeholder="Secret Code eingeben">
         <button id="submit-password">Bestätigen</button>
+        <div id="password-error"></div>
     </div>
+
+    <div id="aimbot-timer"></div>
 
     <script>
         let score = 0;
@@ -131,9 +148,12 @@
         let gameActive = true;
         let aimbotActive = false;
         let bigMeteorUsed = false;
+        let aimbotTimer;
         let titleClickCount = 0;
 
         const lifeBarsContainer = document.getElementById('life-bars');
+        const passwordError = document.getElementById('password-error');
+        const aimbotTimerElement = document.getElementById('aimbot-timer');
 
         function updateLifeBars() {
             const lifeBars = document.querySelectorAll('.life-bar .life');
@@ -177,34 +197,25 @@
             });
         }
 
-        function spawnBoss() {
-            const boss = document.createElement('div');
-            boss.classList.add('boss');
-            boss.innerText = '☄️';
-            document.body.appendChild(boss);
-
-            let bossLife = 5;
-
-            function moveBoss() {
-                boss.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
-                boss.style.top = `${Math.random() * (window.innerHeight - 200)}px`;
-            }
-
-            boss.addEventListener('click', () => {
-                bossLife--;
-                if (bossLife <= 0) {
-                    boss.remove();
-                    addLifeBar();
-                } else {
-                    moveBoss();
-                }
-            });
-
-            moveBoss();
-        }
-
         function updateScore() {
             document.getElementById('score').innerText = `Punkte: ${score}`;
+        }
+
+        function activateAimbot() {
+            aimbotActive = true;
+            aimbotTimerElement.style.display = 'block';
+            let timeLeft = 30;
+
+            aimbotTimer = setInterval(() => {
+                timeLeft--;
+                aimbotTimerElement.innerText = `Aimbot endet in: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(aimbotTimer);
+                    aimbotTimerElement.style.display = 'none';
+                    aimbotActive = false;
+                }
+            }, 1000);
         }
 
         function endGame() {
@@ -216,11 +227,24 @@
         document.getElementById('submit-password').addEventListener('click', () => {
             const password = document.getElementById('password').value.trim();
             if (password === 'AboFluesterer') {
-                aimbotActive = true;
-                alert('Aimbot aktiviert!');
-            } else if (password === '100373' && !bigMeteorUsed) {
-                bigMeteorUsed = true;
-                spawnBoss();
+                if (aimbotActive) {
+                    passwordError.innerText = 'Code bereits eingelöst!';
+                } else {
+                    passwordError.innerText = '';
+                    activateAimbot();
+                    document.getElementById('password-container').style.display = 'none';
+                }
+            } else if (password === '100373') {
+                if (bigMeteorUsed) {
+                    passwordError.innerText = 'Code bereits eingelöst!';
+                } else {
+                    passwordError.innerText = '';
+                    bigMeteorUsed = true;
+                    addLifeBar();
+                    document.getElementById('password-container').style.display = 'none';
+                }
+            } else {
+                passwordError.innerText = 'Code ungültig!';
             }
         });
 
