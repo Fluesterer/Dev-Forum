@@ -49,181 +49,213 @@
             box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
         }
 
-        .life {
+        .life-bar-inner {
+            width: 100%;
             height: 100%;
-            background: linear-gradient(to right, #76ff03, #00e676);
+            background-color: #00ff00;
             border-radius: 15px;
-            transition: width 0.3s ease;
         }
 
-        .meteor, .skull {
+        .object {
             position: absolute;
-            font-size: 5vw;
+            width: 70px;
+            height: 70px;
+            font-size: 50px;
+            line-height: 70px;
+            text-align: center;
+            animation: fall 5s linear infinite;
             cursor: pointer;
-            animation: fall 7s linear;
         }
 
         @keyframes fall {
-            0% { top: -10%; }
-            100% { top: 110%; }
+            from { top: -70px; }
+            to { top: 100vh; }
         }
 
-        .boss-meteor {
-            position: absolute;
-            font-size: 20vw;
-            cursor: pointer;
-            animation: bossMove 5s linear infinite alternate;
-            filter: drop-shadow(0 0 10px #ff4500);
-        }
-
-        @keyframes bossMove {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(20px); }
-        }
-
-        #secret-code-box {
+        #secret-code {
             display: none;
+            margin-top: 20px;
+        }
+
+        #boss-meteor {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px #ff4500;
-        }
-
-        #secret-code-box input {
-            width: 80%;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-
-        #secret-code-box button {
-            padding: 10px 20px;
-            font-size: 1.2em;
+            width: 150px;
+            height: 150px;
+            font-size: 100px;
+            line-height: 150px;
+            text-align: center;
+            background: #ff6347;
+            border-radius: 50%;
             cursor: pointer;
+            z-index: 1000;
+        }
+
+        #timer {
+            font-size: 2em;
+            margin-top: 20px;
+        }
+
+        #game-over {
+            display: none;
+            font-size: 3em;
+            margin-top: 20px;
+            text-shadow: 0 0 10px #ff0000, 0 0 15px #ff0000;
+        }
+
+        #try-again {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.5em;
+            cursor: pointer;
+            background-color: #00ff00;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #00ff00;
         }
     </style>
 </head>
 <body>
-    <h1 id="game-title">Meteoriten Zerstören!</h1>
+    <h1 id="game-title" onclick="showSecretCode()">Meteoriten Zerstören!</h1>
     <div id="life-bars">
-        <div class="life-bar"><div id="life" class="life" style="width: 100%;"></div></div>
+        <div class="life-bar"><div class="life-bar-inner" id="life-bar"></div></div>
     </div>
-
-    <div id="secret-code-box">
-        <input type="text" id="secret-code-input" placeholder="Secret Code eingeben">
-        <button onclick="checkCode()">Einlösen</button>
-        <p id="secret-code-message"></p>
+    <div id="timer"></div>
+    <div id="secret-code">
+        <input type="text" id="code-input" placeholder="Secret Code">
+        <button onclick="submitCode()">Submit</button>
     </div>
+    <div id="game-over">Game Over!</div>
+    <button id="try-again" onclick="restartGame()">Try Again</button>
 
     <script>
         let lives = 5;
-        let bigMeteorUsed = false;
-        const lifeBarsContainer = document.getElementById('life-bars');
+        let score = 0;
+        let bossMeteorSpawned = false;
+        let bossHealth = 10;
+        let aimbotActive = false;
 
-        // Spawning von Meteoriten und Totenköpfen
-        function spawnObject(type = 'meteor') {
+        // Show the secret code input after clicking the title 3 times
+        let titleClicks = 0;
+        function showSecretCode() {
+            titleClicks++;
+            if (titleClicks >= 3) {
+                document.getElementById("secret-code").style.display = "block";
+            }
+        }
+
+        // Meteor and Totenkopf spawning
+        function spawnObject(type) {
             const object = document.createElement("div");
-            object.classList.add(type);
-            object.innerText = type === 'meteor' ? '☄️' : '☠️';
+            object.classList.add("object");
+            object.innerText = type === "meteor" ? "☄️" : "☠️";
             document.body.appendChild(object);
 
-            object.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
-            object.style.top = `-10%`;
+            object.style.left = `${Math.random() * (window.innerWidth - 70)}px`;
 
-            object.addEventListener('click', () => {
-                if (type === 'meteor') {
+            if (type === "meteor") {
+                object.addEventListener("click", () => {
+                    score++;
+                    updateScore();
                     object.remove();
-                } else if (type === 'skull') {
-                    lives--;
-                    updateLifeBars();
+                });
+            } else if (type === "totenkopf") {
+                object.addEventListener("click", () => {
+                    loseLife();
+                    object.remove();
+                });
+            }
+
+            setTimeout(() => {
+                if (document.body.contains(object)) {
+                    if (type === "meteor") loseLife();
                     object.remove();
                 }
-            });
-
-            const duration = type === 'meteor' ? 7000 : 9000;
-            setTimeout(() => {
-                object.remove();
-            }, duration);
+            }, 5000);
         }
 
-        function startSpawning() {
-            setInterval(() => {
-                spawnObject('meteor');
-                if (Math.random() < 0.3) spawnObject('skull');
-            }, 1500);
+        function spawnObjects() {
+            setInterval(() => spawnObject("meteor"), 1000);
+            setInterval(() => spawnObject("totenkopf"), 2000);
         }
 
-        // Boss-Meteor spawnen
+        // Boss Meteor
         function spawnBossMeteor() {
-            if (bigMeteorUsed || lives <= 0) return;
+            if (bossMeteorSpawned) return;
+            bossMeteorSpawned = true;
 
-            bigMeteorUsed = true;
             const bossMeteor = document.createElement("div");
-            bossMeteor.classList.add("boss-meteor");
-            bossMeteor.innerText = '☄️';
+            bossMeteor.id = "boss-meteor";
+            bossMeteor.innerText = "☄️";
             document.body.appendChild(bossMeteor);
 
-            bossMeteor.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
-            bossMeteor.style.top = `20%`;
+            let bossTimer = 15;
+            const bossInterval = setInterval(() => {
+                bossTimer--;
+                document.getElementById("timer").innerText = `Boss Timer: ${bossTimer}s`;
 
-            let clickCount = 0;
-            bossMeteor.addEventListener("click", () => {
-                clickCount++;
-                bossMeteor.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
-
-                if (clickCount >= 5) {
+                if (bossTimer <= 0 || bossHealth <= 0) {
+                    clearInterval(bossInterval);
                     bossMeteor.remove();
-                    lives++;
-                    updateLifeBars();
+                    bossMeteorSpawned = false;
+                    if (bossHealth > 0) {
+                        gameOver();
+                    } else {
+                        addExtraLifeBar();
+                    }
+                }
+            }, 1000);
+
+            bossMeteor.addEventListener("click", () => {
+                if (!aimbotActive) {
+                    bossHealth--;
+                    bossMeteor.style.left = `${Math.random() * (window.innerWidth - 150)}px`;
+                    bossMeteor.style.top = `${Math.random() * (window.innerHeight - 150)}px`;
                 }
             });
         }
 
-        // Secret Code überprüfen
-        function checkCode() {
-            const code = document.getElementById('secret-code-input').value;
-            const message = document.getElementById('secret-code-message');
-            if (code === '100373') {
-                if (bigMeteorUsed) {
-                    message.innerText = "Code wurde bereits eingelöst!";
-                } else {
-                    spawnBossMeteor();
-                    message.innerText = "Boss-Meteor gespawnt!";
-                    document.getElementById('secret-code-box').style.display = 'none';
-                }
+        function addExtraLifeBar() {
+            const extraLifeBar = document.createElement("div");
+            extraLifeBar.classList.add("life-bar");
+            const lifeBarInner = document.createElement("div");
+            lifeBarInner.classList.add("life-bar-inner");
+            lifeBarInner.id = "extra-life-bar";
+            extraLifeBar.appendChild(lifeBarInner);
+            document.getElementById("life-bars").appendChild(extraLifeBar);
+        }
+
+        // Code Submission
+        function submitCode() {
+            const code = document.getElementById("code-input").value;
+            if (code === "100373") {
+                spawnBossMeteor();
             } else {
-                message.innerText = "Code ungültig!";
+                alert("Invalid code!");
+            }
+            document.getElementById("secret-code").style.display = "none";
+        }
+
+        // Life management
+        function loseLife() {
+            lives--;
+            document.getElementById("life-bar").style.width = `${(lives / 5) * 100}%`;
+            if (lives <= 0) {
+                gameOver();
             }
         }
 
-        // UI Updates
-        function updateLifeBars() {
-            const lifeBars = document.querySelectorAll('.life-bar .life');
-            lifeBars.forEach((bar, index) => {
-                if (index < lives) {
-                    bar.style.width = '100%';
-                } else {
-                    bar.style.width = '0%';
-                }
-            });
+        function gameOver() {
+            document.getElementById("game-over").style.display = "block";
+            document.getElementById("try-again").style.display = "block";
         }
 
-        // Secret-Code-Box anzeigen
-        let clickCount = 0;
-        document.getElementById('game-title').addEventListener('click', () => {
-            clickCount++;
-            if (clickCount === 3) {
-                document.getElementById('secret-code-box').style.display = 'block';
-            }
-        });
+        function restartGame() {
+            location.reload();
+        }
 
-        // Spiel starten
-        updateLifeBars();
-        startSpawning();
+        // Initialize game
+        spawnObjects();
     </script>
 </body>
 </html>
