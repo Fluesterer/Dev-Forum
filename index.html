@@ -8,19 +8,11 @@
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(to bottom, #1e3c72, #2a5298);
-            background-size: 400% 400%;
-            animation: gradientBG 10s ease infinite;
             color: white;
             text-align: center;
             margin: 0;
             padding: 0;
             overflow: hidden;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         h1 {
@@ -67,6 +59,21 @@
             cursor: pointer;
         }
 
+        .boss-meteor {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            font-size: 150px;
+            line-height: 200px;
+            text-align: center;
+            animation: fall 15s linear infinite;
+            cursor: pointer;
+            background: radial-gradient(circle, orange, red);
+            border-radius: 50%;
+            border: 5px solid yellow;
+            box-shadow: 0 0 50px red;
+        }
+
         @keyframes fall {
             from { top: -70px; }
             to { top: 100vh; }
@@ -75,19 +82,6 @@
         #secret-code {
             display: none;
             margin-top: 20px;
-        }
-
-        #boss-meteor {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            font-size: 100px;
-            line-height: 150px;
-            text-align: center;
-            background: #ff6347;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1000;
         }
 
         #timer {
@@ -99,7 +93,6 @@
             display: none;
             font-size: 3em;
             margin-top: 20px;
-            text-shadow: 0 0 10px #ff0000, 0 0 15px #ff0000;
         }
 
         #try-again {
@@ -111,7 +104,6 @@
             background-color: #00ff00;
             border: none;
             border-radius: 10px;
-            box-shadow: 0 0 10px #00ff00;
         }
     </style>
 </head>
@@ -131,9 +123,13 @@
     <script>
         let lives = 5;
         let score = 0;
-        let bossMeteorSpawned = false;
-        let bossHealth = 10;
         let aimbotActive = false;
+        let aimbotUsed = false;
+        let bossSpawned = false;
+        let bossDefeated = false;
+        let objectsInterval;
+        let bossMeteor;
+        let bossClicks = 0;
 
         // Show the secret code input after clicking the title 3 times
         let titleClicks = 0;
@@ -155,97 +151,127 @@
 
             if (type === "meteor") {
                 object.addEventListener("click", () => {
-                    score++;
-                    updateScore();
-                    object.remove();
+                    if (!aimbotActive) {
+                        score++;
+                        updateScore();
+                        object.remove();
+                    }
                 });
             } else if (type === "totenkopf") {
                 object.addEventListener("click", () => {
-                    loseLife();
-                    object.remove();
+                    if (!aimbotActive) {
+                        loseLife();
+                        object.remove();
+                    }
                 });
             }
 
             setTimeout(() => {
                 if (document.body.contains(object)) {
-                    if (type === "meteor") loseLife();
+                    if (type === "meteor" && !aimbotActive) loseLife();
                     object.remove();
                 }
             }, 5000);
         }
 
         function spawnObjects() {
-            setInterval(() => spawnObject("meteor"), 1000);
+            objectsInterval = setInterval(() => spawnObject("meteor"), 1000);
             setInterval(() => spawnObject("totenkopf"), 2000);
         }
 
-        // Boss Meteor
-        function spawnBossMeteor() {
-            if (bossMeteorSpawned) return;
-            bossMeteorSpawned = true;
+        // Aimbot activation
+        function activateAimbot() {
+            if (aimbotUsed) {
+                alert("Aimbot bereits verwendet!");
+                return;
+            }
 
-            const bossMeteor = document.createElement("div");
-            bossMeteor.id = "boss-meteor";
-            bossMeteor.innerText = "☄️";
-            document.body.appendChild(bossMeteor);
+            aimbotUsed = true;
+            aimbotActive = true;
 
-            let bossTimer = 15;
-            const bossInterval = setInterval(() => {
-                bossTimer--;
-                document.getElementById("timer").innerText = `Boss Timer: ${bossTimer}s`;
-
-                if (bossTimer <= 0 || bossHealth <= 0) {
-                    clearInterval(bossInterval);
-                    bossMeteor.remove();
-                    bossMeteorSpawned = false;
-                    if (bossHealth > 0) {
-                        gameOver();
-                    } else {
-                        addExtraLifeBar();
+            const aimbotTimer = setInterval(() => {
+                const meteors = document.querySelectorAll(".object");
+                meteors.forEach(meteor => {
+                    if (meteor.innerText === "☄️") {
+                        meteor.click();
                     }
+                });
+            }, 100);
+
+            let aimbotTime = 30;
+            const timerDisplay = document.getElementById("timer");
+            const aimbotCountdown = setInterval(() => {
+                aimbotTime--;
+                timerDisplay.innerText = `Aimbot aktiv: ${aimbotTime}s`;
+
+                if (aimbotTime <= 0) {
+                    clearInterval(aimbotCountdown);
+                    clearInterval(aimbotTimer);
+                    aimbotActive = false;
+                    timerDisplay.innerText = "";
                 }
             }, 1000);
-
-            bossMeteor.addEventListener("click", () => {
-                if (!aimbotActive) {
-                    bossHealth--;
-                    bossMeteor.style.left = `${Math.random() * (window.innerWidth - 150)}px`;
-                    bossMeteor.style.top = `${Math.random() * (window.innerHeight - 150)}px`;
-                }
-            });
         }
 
-        function addExtraLifeBar() {
-            const extraLifeBar = document.createElement("div");
-            extraLifeBar.classList.add("life-bar");
-            const lifeBarInner = document.createElement("div");
-            lifeBarInner.classList.add("life-bar-inner");
-            lifeBarInner.id = "extra-life-bar";
-            extraLifeBar.appendChild(lifeBarInner);
-            document.getElementById("life-bars").appendChild(extraLifeBar);
+        // Boss-Meteor
+        function spawnBoss() {
+            if (bossSpawned) return;
+            bossSpawned = true;
+
+            bossMeteor = document.createElement("div");
+            bossMeteor.classList.add("boss-meteor");
+            bossMeteor.innerText = "☄️";
+            document.body.appendChild(bossMeteor);
+            bossMeteor.style.left = `${window.innerWidth / 2 - 100}px`;
+
+            bossMeteor.addEventListener("click", () => {
+                bossClicks++;
+                if (bossClicks >= 10) {
+                    bossMeteor.remove();
+                    bossDefeated = true;
+                }
+            });
+
+            setTimeout(() => {
+                if (!bossDefeated) {
+                    gameOver();
+                }
+            }, 15000);
         }
 
         // Code Submission
         function submitCode() {
             const code = document.getElementById("code-input").value;
-            if (code === "100373") {
-                spawnBossMeteor();
+            if (code === "AboFluesterer") {
+                activateAimbot();
+            } else if (code === "100373") {
+                spawnBoss();
             } else {
-                alert("Invalid code!");
+                alert("Ungültiger Code!");
             }
-            document.getElementById("secret-code").style.display = "none";
+            document.getElementById("code-input").value = "";
         }
 
         // Life management
         function loseLife() {
             lives--;
-            document.getElementById("life-bar").style.width = `${(lives / 5) * 100}%`;
+            updateLives();
             if (lives <= 0) {
                 gameOver();
             }
         }
 
+        function updateLives() {
+            const lifeBar = document.getElementById("life-bar");
+            lifeBar.style.width = `${(lives / 5) * 100}%`;
+            if (lives <= 2) {
+                lifeBar.style.backgroundColor = "red";
+            }
+        }
+
+        // Game over
         function gameOver() {
+            clearInterval(objectsInterval);
             document.getElementById("game-over").style.display = "block";
             document.getElementById("try-again").style.display = "block";
         }
@@ -254,7 +280,6 @@
             location.reload();
         }
 
-        // Initialize game
         spawnObjects();
     </script>
 </body>
