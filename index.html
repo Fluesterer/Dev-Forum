@@ -6,8 +6,8 @@
     <title>Meteoriten Zerstören!</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #111;
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
             color: white;
             text-align: center;
             margin: 0;
@@ -17,42 +17,61 @@
         h1 {
             font-size: 3em;
             margin-top: 20px;
+            text-shadow: 2px 2px 5px #ff4500;
         }
-        #score {
+        #score, #lives {
             font-size: 1.5em;
             margin: 20px;
-        }
-        #lives {
-            font-size: 1.5em;
-            margin: 20px;
+            text-shadow: 1px 1px 3px #00ff00;
         }
         #life-bar {
-            width: 200px;
-            height: 20px;
+            width: 300px;
+            height: 25px;
             background-color: #444;
+            border: 2px solid #00ff00;
             margin: 20px auto;
+            position: relative;
+            border-radius: 10px;
         }
         .life {
             height: 100%;
             background-color: green;
-            width: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
         .meteor, .skull {
             position: absolute;
-            font-size: 30px;
+            font-size: 40px;
             cursor: pointer;
-            animation: bounce 3s ease-in-out 3 forwards;
+            animation: fall 6s linear forwards;
+            filter: drop-shadow(0 0 5px #ff6347);
         }
-        @keyframes bounce {
-            0% { top: -50px; }
-            30% { top: 80%; }
-            60% { top: 40%; }
-            100% { top: 100%; }
+        @keyframes fall {
+            from { top: -50px; }
+            to { top: 100%; }
         }
         .game-over {
             display: none;
-            font-size: 2em;
-            color: red;
+            font-size: 2.5em;
+            color: #ff0000;
+            text-shadow: 2px 2px 5px black;
+            margin-top: 50px;
+        }
+        #try-again {
+            display: block;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            color: white;
+            background-color: #ff4500;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            text-shadow: 1px 1px 3px black;
+            transition: background-color 0.3s ease;
+        }
+        #try-again:hover {
+            background-color: #ff6347;
         }
     </style>
 </head>
@@ -61,7 +80,10 @@
     <div id="score">Punkte: 0</div>
     <div id="lives">Leben: 3</div>
     <div id="life-bar"><div id="life" class="life"></div></div>
-    <div id="game-over" class="game-over">Game Over! Deine Punktzahl: <span id="final-score"></span></div>
+    <div id="game-over" class="game-over">
+        Game Over! Deine Punktzahl: <span id="final-score"></span>
+        <button id="try-again">Try Again</button>
+    </div>
 
     <script>
         let score = 0;
@@ -70,10 +92,14 @@
         let lifeBar = document.getElementById('life');
         let gameOverScreen = document.getElementById('game-over');
         let finalScore = document.getElementById('final-score');
+        let tryAgainButton = document.getElementById('try-again');
+        let gameActive = true;
 
-        // Funktion, um Meteoriten oder Toten-Köpfe zu erstellen
+        // Funktion, um Meteoriten oder Totenköpfe zu erstellen
         function createObject() {
-            const isSkull = Math.random() < 0.2; // 20% Wahrscheinlichkeit für Toten-Kopf
+            if (!gameActive) return; // Keine neuen Objekte nach Game Over
+
+            const isSkull = Math.random() < 0.2; // 20% Wahrscheinlichkeit für Totenkopf
             const object = document.createElement("div");
             object.classList.add(isSkull ? "skull" : "meteor");
             object.innerText = isSkull ? "☠️" : "🌑"; // Emoji für Totenkopf oder Meteorit
@@ -86,7 +112,7 @@
             object.addEventListener("click", function () {
                 object.remove();
                 if (isSkull) {
-                    // Toten-Kopf: Leben verlieren
+                    // Totenkopf: Leben verlieren
                     lives--;
                     updateLifeBar();
                 } else {
@@ -96,8 +122,9 @@
                 }
             });
 
-            // Nach der Animation das Objekt entfernen und Leben abziehen (falls nicht geklickt)
+            // Objekt nach der Animation entfernen und Leben abziehen (falls nicht geklickt)
             object.addEventListener("animationend", function () {
+                if (!gameActive) return;
                 object.remove();
                 if (!isSkull) {
                     lives--;
@@ -119,15 +146,31 @@
 
         // Funktion, um das Spiel zu beenden
         function endGame() {
+            gameActive = false; // Keine neuen Objekte mehr spawnen
             finalScore.innerText = score;
             gameOverScreen.style.display = "block";
-            clearInterval(meteorTimer); // Meteoriten-Interval stoppen
+            clearInterval(meteorTimer); // Timer stoppen
         }
+
+        // Funktion, um das Spiel zurückzusetzen
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            gameActive = true;
+            document.getElementById("score").innerText = `Punkte: ${score}`;
+            document.getElementById("lives").innerText = `Leben: ${lives}`;
+            lifeBar.style.width = "100%";
+            gameOverScreen.style.display = "none";
+            spawnObjects(); // Neues Spawnen starten
+        }
+
+        // "Try Again"-Button klickbar machen
+        tryAgainButton.addEventListener("click", resetGame);
 
         // Funktion zum Starten der Objekte (Meteoriten und Totenköpfe)
         function spawnObjects() {
             createObject(); // Ein Objekt erstellen
-            meteorTimer = setInterval(createObject, 1000); // Alle 1 Sekunde ein neues Objekt
+            meteorTimer = setInterval(createObject, 1500); // Alle 1.5 Sekunden ein neues Objekt
         }
 
         // Seite lädt
