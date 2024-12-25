@@ -7,71 +7,92 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #000;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
             color: white;
             text-align: center;
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         h1 {
-            font-size: 3em;
-            margin-top: 20px;
-            text-shadow: 2px 2px 5px #ff4500;
+            font-size: 5vw;
+            margin-top: 5px;
+            text-shadow: 0 0 20px #ff4500, 0 0 30px #ff4500;
         }
+
         #score {
-            font-size: 1.5em;
-            margin: 20px;
-            text-shadow: 1px 1px 3px #00ff00;
+            font-size: 4vw;
+            margin: 10px;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
         }
+
         #life-bar {
-            width: 300px;
+            width: 90%;
+            max-width: 400px;
             height: 25px;
-            background-color: #444;
+            background-color: #333;
             border: 2px solid #00ff00;
-            margin: 20px auto;
+            margin: 10px auto;
             position: relative;
-            border-radius: 10px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
         }
+
         .life {
             height: 100%;
-            background-color: green;
-            border-radius: 10px;
+            background: linear-gradient(to right, #76ff03, #00e676);
+            border-radius: 15px;
             transition: width 0.3s ease;
         }
+
         .meteor, .skull {
             position: absolute;
-            font-size: 40px;
+            font-size: 6vw;
             cursor: pointer;
-            animation: fall 5s linear forwards;
-            filter: drop-shadow(0 0 5px #ff6347);
+            animation: fall 7s linear forwards;
+            filter: drop-shadow(0 0 10px #ff4500);
         }
+
         @keyframes fall {
-            from { top: -50px; }
+            from { top: -10%; }
             to { top: 100%; }
         }
+
         .game-over {
             display: none;
-            font-size: 2.5em;
+            font-size: 5vw;
             color: #ff0000;
-            text-shadow: 2px 2px 5px black;
-            margin-top: 50px;
+            text-shadow: 0 0 20px black, 0 0 30px black;
+            margin-top: 20px;
         }
+
         #try-again {
             display: block;
-            font-size: 1.5em;
+            font-size: 4vw;
             padding: 10px 20px;
             color: white;
             background-color: #ff4500;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             margin-top: 20px;
             cursor: pointer;
-            text-shadow: 1px 1px 3px black;
-            transition: background-color 0.3s ease;
+            text-shadow: 0 0 10px black, 0 0 15px black;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: 0 0 15px #ff4500;
         }
+
         #try-again:hover {
             background-color: #ff6347;
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -86,7 +107,7 @@
 
     <script>
         let score = 0;
-        let lives = 5; // 5 Leben
+        let lives = 5;
         let meteorTimer;
         let lifeBar = document.getElementById('life');
         let gameOverScreen = document.getElementById('game-over');
@@ -94,34 +115,28 @@
         let tryAgainButton = document.getElementById('try-again');
         let gameActive = true;
 
-        // Funktion, um Meteoriten oder Totenköpfe zu erstellen
         function createObject() {
-            if (!gameActive) return; // Keine neuen Objekte nach Game Over
+            if (!gameActive) return;
 
-            const isSkull = Math.random() < 0.2; // 20% Wahrscheinlichkeit für Totenkopf
+            const isSkull = Math.random() < 0.2;
             const object = document.createElement("div");
             object.classList.add(isSkull ? "skull" : "meteor");
-            object.innerText = isSkull ? "☠️" : "☄️"; // Totenkopf oder Meteorit
+            object.innerText = isSkull ? "☠️" : "☄️";
             document.body.appendChild(object);
 
-            // Zufällige Position für das Objekt
             object.style.left = `${Math.random() * window.innerWidth}px`;
 
-            // EventListener für Klick
             object.addEventListener("click", function () {
                 object.remove();
                 if (isSkull) {
-                    // Totenkopf: Leben verlieren
                     lives--;
                     updateLifeBar();
                 } else {
-                    // Meteorit: Punkt erhalten
                     score++;
                     document.getElementById("score").innerText = `Punkte: ${score}`;
                 }
             });
 
-            // Objekt nach der Animation entfernen und Leben abziehen (falls nicht geklickt)
             object.addEventListener("animationend", function () {
                 if (!gameActive) return;
                 object.remove();
@@ -132,25 +147,22 @@
             });
         }
 
-        // Funktion, um Lebensbalken zu aktualisieren
         function updateLifeBar() {
             if (lives <= 0) {
-                endGame(); // Game Over, wenn keine Leben mehr
+                endGame();
             } else {
-                let lifePercentage = (lives / 5) * 100; // 5 Leben = 100%
+                let lifePercentage = (lives / 5) * 100;
                 lifeBar.style.width = `${lifePercentage}%`;
             }
         }
 
-        // Funktion, um das Spiel zu beenden
         function endGame() {
-            gameActive = false; // Keine neuen Objekte mehr spawnen
+            gameActive = false;
             finalScore.innerText = score;
             gameOverScreen.style.display = "block";
-            clearInterval(meteorTimer); // Timer stoppen
+            clearInterval(meteorTimer);
         }
 
-        // Funktion, um das Spiel zurückzusetzen
         function resetGame() {
             score = 0;
             lives = 5;
@@ -158,21 +170,18 @@
             document.getElementById("score").innerText = `Punkte: ${score}`;
             lifeBar.style.width = "100%";
             gameOverScreen.style.display = "none";
-            spawnObjects(); // Neues Spawnen starten
+            spawnObjects();
         }
 
-        // "Try Again"-Button klickbar machen
         tryAgainButton.addEventListener("click", resetGame);
 
-        // Funktion zum Starten der Objekte (Meteoriten und Totenköpfe)
         function spawnObjects() {
-            createObject(); // Ein Objekt erstellen
-            meteorTimer = setInterval(createObject, 1000); // Alle 1 Sekunde ein neues Objekt
+            createObject();
+            meteorTimer = setInterval(createObject, 900);
         }
 
-        // Seite lädt
         window.onload = () => {
-            spawnObjects(); // Objekte spawnen beim Laden der Seite
+            spawnObjects();
         };
     </script>
 </body>
