@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #000428, #004e92);
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
             background-size: 400% 400%;
             animation: gradientBG 10s ease infinite;
             color: white;
@@ -35,13 +35,20 @@
             text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
         }
 
-        #life-bar {
+        #life-bars {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .life-bar {
             width: 90%;
             max-width: 400px;
             height: 30px;
             background-color: #333;
             border: 2px solid #00ff00;
-            margin: 10px auto;
+            margin: 10px 0;
             position: relative;
             border-radius: 15px;
             box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
@@ -62,37 +69,22 @@
             filter: drop-shadow(0 0 10px #ff4500);
         }
 
-        .meteor:hover, .skull:hover {
-            transform: scale(1.1); /* Visuelles Feedback beim Überfahren */
-        }
-
-        #game-over {
-            display: none;
-            font-size: 6vw;
-            color: #ff0000;
-            text-shadow: 0 0 20px black, 0 0 30px black;
-            margin-top: 20px;
-        }
-
-        #try-again {
-            display: block;
-            font-size: 5vw;
-            padding: 15px 25px;
-            color: white;
-            background-color: #ff4500;
-            border: none;
-            border-radius: 10px;
-            margin: 20px auto;
-            width: 50%;
+        .boss {
+            position: absolute;
+            font-size: 20vw;
             cursor: pointer;
-            text-shadow: 0 0 10px black, 0 0 15px black;
-            transition: background-color 0.3s ease, transform 0.2s;
-            box-shadow: 0 0 15px #ff4500;
+            color: #ff4500;
+            font-weight: bold;
+            filter: drop-shadow(0 0 30px #ff0000);
+            animation: shake 0.5s infinite;
         }
 
-        #try-again:hover {
-            background-color: #ff6347;
-            transform: scale(1.1);
+        @keyframes shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(10px, -10px); }
+            50% { transform: translate(-10px, 10px); }
+            75% { transform: translate(10px, 10px); }
+            100% { transform: translate(-10px, -10px); }
         }
 
         #password-container {
@@ -129,142 +121,113 @@
 <body>
     <h1>Meteoriten Zerstören!</h1>
     <div id="score">Punkte: 0</div>
-    <div id="life-bar"><div id="life" class="life"></div></div>
+    <div id="life-bars"><div class="life-bar"><div id="life" class="life"></div></div></div>
 
     <div id="password-container">
-        <input type="text" id="password" placeholder="Passwort eingeben">
+        <input type="text" id="password" placeholder="Secret Code eingeben">
         <button id="submit-password">Bestätigen</button>
-    </div>
-
-    <div id="game-over">
-        Game Over! Deine Punktzahl: <span id="final-score"></span>
-        <button id="try-again">Try Again</button>
     </div>
 
     <script>
         let score = 0;
         let lives = 5;
+        let additionalLives = 0;
         let meteorTimer;
-        let lifeBar = document.getElementById('life');
-        let gameOverScreen = document.getElementById('game-over');
-        let finalScore = document.getElementById('final-score');
-        let tryAgainButton = document.getElementById('try-again');
-        let passwordInput = document.getElementById('password');
-        let submitPassword = document.getElementById('submit-password');
-        let bigMeteorActive = false;
-        let bigMeteorUsed = false;
+        let gameActive = true;
         let aimbotActive = false;
+        let bigMeteorUsed = false;
 
-        function createObject() {
-            if (!gameActive || bigMeteorActive) return;
+        const lifeBarsContainer = document.getElementById('life-bars');
 
-            const isSkull = Math.random() < 0.2;
-            const object = document.createElement("div");
-            object.classList.add(isSkull ? "skull" : "meteor");
-            object.innerText = isSkull ? "☠️" : "☄️";
-            document.body.appendChild(object);
-
-            object.style.left = `${Math.random() * (window.innerWidth - 80)}px`; // Bleibt im sichtbaren Bereich
-            object.style.top = "-10%";
-
-            if (aimbotActive && !isSkull) {
-                setTimeout(() => object.click(), 200);
-            }
-
-            object.addEventListener("click", function () {
-                object.remove();
-                if (isSkull) {
-                    lives--;
-                    updateLifeBar();
+        function updateLifeBars() {
+            const lifeBars = document.querySelectorAll('.life-bar .life');
+            lifeBars.forEach((bar, index) => {
+                if (index < lives) {
+                    bar.style.width = '100%';
                 } else {
-                    score++;
-                    document.getElementById("score").innerText = `Punkte: ${score}`;
-                }
-            });
-
-            object.addEventListener("animationend", function () {
-                if (!gameActive) return;
-                object.remove();
-                if (!isSkull) {
-                    lives--;
-                    updateLifeBar();
+                    bar.style.width = '0%';
                 }
             });
         }
 
-        function updateLifeBar() {
-            if (lives <= 0) {
-                endGame();
-            } else {
-                let lifePercentage = (lives / 5) * 100;
-                lifeBar.style.width = `${lifePercentage}%`;
+        function spawnObject(type = 'meteor') {
+            if (!gameActive || type === 'boss') return;
+
+            const object = document.createElement("div");
+            object.classList.add(type);
+            object.innerText = type === 'meteor' ? '☄️' : '☠️';
+            document.body.appendChild(object);
+
+            object.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
+            object.style.top = `-10%`;
+
+            object.addEventListener("click", () => {
+                if (type === 'meteor') {
+                    score++;
+                    updateScore();
+                } else {
+                    lives--;
+                    updateLifeBars();
+                    if (lives <= 0) endGame();
+                }
+                object.remove();
+            });
+        }
+
+        function spawnBoss() {
+            const boss = document.createElement('div');
+            boss.classList.add('boss');
+            boss.innerText = '☄️';
+            document.body.appendChild(boss);
+
+            let bossLife = 5;
+
+            function moveBoss() {
+                boss.style.left = `${Math.random() * (window.innerWidth - 200)}px`;
+                boss.style.top = `${Math.random() * (window.innerHeight - 200)}px`;
             }
+
+            boss.addEventListener('click', () => {
+                bossLife--;
+                if (bossLife <= 0) {
+                    boss.remove();
+                    lives++;
+                    additionalLives++;
+                    updateLifeBars();
+                } else {
+                    moveBoss();
+                }
+            });
+
+            moveBoss();
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerText = `Punkte: ${score}`;
         }
 
         function endGame() {
             gameActive = false;
-            finalScore.innerText = score;
-            gameOverScreen.style.display = "block";
             clearInterval(meteorTimer);
+            alert(`Game Over! Deine Punktzahl: ${score}`);
         }
 
-        function resetGame() {
-            score = 0;
-            lives = 5;
-            aimbotActive = false;
-            bigMeteorUsed = false;
-            gameActive = true;
-            document.getElementById("score").innerText = `Punkte: ${score}`;
-            lifeBar.style.width = "100%";
-            gameOverScreen.style.display = "none";
-            spawnObjects();
-        }
-
-        submitPassword.addEventListener("click", () => {
-            const password = passwordInput.value.trim();
-            if (password === "AboFluesterer") {
+        document.getElementById('submit-password').addEventListener('click', () => {
+            const password = document.getElementById('password').value.trim();
+            if (password === 'AboFluesterer') {
                 aimbotActive = true;
-                alert("Aimbot aktiviert!");
-            } else if (password === "100373" && !bigMeteorUsed) {
+                alert('Aimbot aktiviert!');
+            } else if (password === '100373' && !bigMeteorUsed) {
                 bigMeteorUsed = true;
-                bigMeteorActive = true;
-                spawnBigMeteor();
+                spawnBoss();
             }
-            passwordInput.value = "";
         });
 
-        function spawnBigMeteor() {
-            const bigMeteor = document.createElement("div");
-            bigMeteor.classList.add("meteor");
-            bigMeteor.innerText = "☄️";
-            bigMeteor.style.fontSize = "15vw";
-            bigMeteor.style.left = `${window.innerWidth / 2 - 100}px`;
-            bigMeteor.style.top = "20%";
-            document.body.appendChild(bigMeteor);
-
-            let clicks = 0;
-
-            bigMeteor.addEventListener("click", function () {
-                clicks++;
-                if (clicks >= 5) {
-                    bigMeteor.remove();
-                    lives++;
-                    updateLifeBar();
-                    bigMeteorActive = false;
-                }
-            });
+        function startGame() {
+            meteorTimer = setInterval(() => spawnObject('meteor'), 1000);
         }
 
-        tryAgainButton.addEventListener("click", resetGame);
-
-        function spawnObjects() {
-            createObject();
-            meteorTimer = setInterval(createObject, 800);
-        }
-
-        window.onload = () => {
-            spawnObjects();
-        };
+        startGame();
     </script>
 </body>
 </html>
