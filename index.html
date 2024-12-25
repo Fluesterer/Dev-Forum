@@ -19,7 +19,7 @@
             margin-top: 20px;
             text-shadow: 2px 2px 5px #ff4500;
         }
-        #score, #lives {
+        #score {
             font-size: 1.5em;
             margin: 20px;
             text-shadow: 1px 1px 3px #00ff00;
@@ -43,7 +43,7 @@
             position: absolute;
             font-size: 40px;
             cursor: pointer;
-            animation: fall 6s linear forwards;
+            animation: fall 5s linear forwards;
             filter: drop-shadow(0 0 5px #ff6347);
         }
         @keyframes fall {
@@ -78,7 +78,6 @@
 <body>
     <h1>Meteoriten Zerstören!</h1>
     <div id="score">Punkte: 0</div>
-    <div id="lives">Leben: 3</div>
     <div id="life-bar"><div id="life" class="life"></div></div>
     <div id="game-over" class="game-over">
         Game Over! Deine Punktzahl: <span id="final-score"></span>
@@ -87,7 +86,7 @@
 
     <script>
         let score = 0;
-        let lives = 3;
+        let lives = 5; // 5 Leben
         let meteorTimer;
         let lifeBar = document.getElementById('life');
         let gameOverScreen = document.getElementById('game-over');
@@ -102,7 +101,7 @@
             const isSkull = Math.random() < 0.2; // 20% Wahrscheinlichkeit für Totenkopf
             const object = document.createElement("div");
             object.classList.add(isSkull ? "skull" : "meteor");
-            object.innerText = isSkull ? "☠️" : "🌑"; // Emoji für Totenkopf oder Meteorit
+            object.innerText = isSkull ? "☠️" : "☄️"; // Totenkopf oder Meteorit
             document.body.appendChild(object);
 
             // Zufällige Position für das Objekt
@@ -138,9 +137,8 @@
             if (lives <= 0) {
                 endGame(); // Game Over, wenn keine Leben mehr
             } else {
-                let lifePercentage = (lives / 3) * 100;
+                let lifePercentage = (lives / 5) * 100; // 5 Leben = 100%
                 lifeBar.style.width = `${lifePercentage}%`;
-                document.getElementById("lives").innerText = `Leben: ${lives}`;
             }
         }
 
@@ -155,10 +153,9 @@
         // Funktion, um das Spiel zurückzusetzen
         function resetGame() {
             score = 0;
-            lives = 3;
+            lives = 5;
             gameActive = true;
             document.getElementById("score").innerText = `Punkte: ${score}`;
-            document.getElementById("lives").innerText = `Leben: ${lives}`;
             lifeBar.style.width = "100%";
             gameOverScreen.style.display = "none";
             spawnObjects(); // Neues Spawnen starten
@@ -170,7 +167,7 @@
         // Funktion zum Starten der Objekte (Meteoriten und Totenköpfe)
         function spawnObjects() {
             createObject(); // Ein Objekt erstellen
-            meteorTimer = setInterval(createObject, 1500); // Alle 1.5 Sekunden ein neues Objekt
+            meteorTimer = setInterval(createObject, 1000); // Alle 1 Sekunde ein neues Objekt
         }
 
         // Seite lädt
