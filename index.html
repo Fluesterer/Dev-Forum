@@ -22,68 +22,118 @@
             font-size: 1.5em;
             margin: 20px;
         }
-        .meteor {
+        #lives {
+            font-size: 1.5em;
+            margin: 20px;
+        }
+        #life-bar {
+            width: 200px;
+            height: 20px;
+            background-color: #444;
+            margin: 20px auto;
+        }
+        .life {
+            height: 100%;
+            background-color: green;
+            width: 100%;
+        }
+        .meteor, .skull {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: #ff6347;
-            border-radius: 50%;
-            animation: fall 5s linear infinite;
+            font-size: 30px;
             cursor: pointer;
+            animation: bounce 3s ease-in-out 3 forwards;
         }
-        @keyframes fall {
-            from {
-                top: -50px;
-            }
-            to {
-                top: 100vh;
-            }
+        @keyframes bounce {
+            0% { top: -50px; }
+            30% { top: 80%; }
+            60% { top: 40%; }
+            100% { top: 100%; }
         }
-        .meteor:hover {
-            background-color: #ff0000;
+        .game-over {
+            display: none;
+            font-size: 2em;
+            color: red;
         }
     </style>
 </head>
 <body>
-    <h1>Zerstöre die Meteoriten!</h1>
+    <h1>Meteoriten Zerstören!</h1>
     <div id="score">Punkte: 0</div>
+    <div id="lives">Leben: 3</div>
+    <div id="life-bar"><div id="life" class="life"></div></div>
+    <div id="game-over" class="game-over">Game Over! Deine Punktzahl: <span id="final-score"></span></div>
 
     <script>
         let score = 0;
+        let lives = 3;
         let meteorTimer;
-        
-        // Funktion um Meteoriten zu erstellen
-        function createMeteor() {
-            const meteor = document.createElement("div");
-            meteor.classList.add("meteor");
-            document.body.appendChild(meteor);
+        let lifeBar = document.getElementById('life');
+        let gameOverScreen = document.getElementById('game-over');
+        let finalScore = document.getElementById('final-score');
 
-            // Zufällige Position für den Meteoriten
-            meteor.style.left = `${Math.random() * window.innerWidth}px`;
+        // Funktion, um Meteoriten oder Toten-Köpfe zu erstellen
+        function createObject() {
+            const isSkull = Math.random() < 0.2; // 20% Wahrscheinlichkeit für Toten-Kopf
+            const object = document.createElement("div");
+            object.classList.add(isSkull ? "skull" : "meteor");
+            object.innerText = isSkull ? "☠️" : "🌑"; // Emoji für Totenkopf oder Meteorit
+            document.body.appendChild(object);
 
-            // EventListener für Klick auf Meteoriten
-            meteor.addEventListener("click", function() {
-                meteor.remove();  // Meteorite wird entfernt
-                score++;  // Punkt erhöhen
-                document.getElementById("score").innerText = `Punkte: ${score}`;
+            // Zufällige Position für das Objekt
+            object.style.left = `${Math.random() * window.innerWidth}px`;
+
+            // EventListener für Klick
+            object.addEventListener("click", function () {
+                object.remove();
+                if (isSkull) {
+                    // Toten-Kopf: Leben verlieren
+                    lives--;
+                    updateLifeBar();
+                } else {
+                    // Meteorit: Punkt erhalten
+                    score++;
+                    document.getElementById("score").innerText = `Punkte: ${score}`;
+                }
             });
 
-            // Nach 5 Sekunden Meteoriten entfernen (falls nicht geklickt)
-            setTimeout(() => {
-                meteor.remove();
-            }, 5000);
+            // Nach der Animation das Objekt entfernen und Leben abziehen (falls nicht geklickt)
+            object.addEventListener("animationend", function () {
+                object.remove();
+                if (!isSkull) {
+                    lives--;
+                    updateLifeBar();
+                }
+            });
         }
 
-        // Alle 1 Minute Meteoriten neu erstellen
-        function spawnMeteors() {
-            createMeteor();  // Einen Meteor erstellen
-            meteorTimer = setInterval(createMeteor, 60000);  // Alle 1 Minute neuen Meteor erstellen
+        // Funktion, um Lebensbalken zu aktualisieren
+        function updateLifeBar() {
+            if (lives <= 0) {
+                endGame(); // Game Over, wenn keine Leben mehr
+            } else {
+                let lifePercentage = (lives / 3) * 100;
+                lifeBar.style.width = `${lifePercentage}%`;
+                document.getElementById("lives").innerText = `Leben: ${lives}`;
+            }
+        }
+
+        // Funktion, um das Spiel zu beenden
+        function endGame() {
+            finalScore.innerText = score;
+            gameOverScreen.style.display = "block";
+            clearInterval(meteorTimer); // Meteoriten-Interval stoppen
+        }
+
+        // Funktion zum Starten der Objekte (Meteoriten und Totenköpfe)
+        function spawnObjects() {
+            createObject(); // Ein Objekt erstellen
+            meteorTimer = setInterval(createObject, 1000); // Alle 1 Sekunde ein neues Objekt
         }
 
         // Seite lädt
         window.onload = () => {
-            spawnMeteors();  // Meteoriten spawnen beim Laden der Seite
-        }
+            spawnObjects(); // Objekte spawnen beim Laden der Seite
+        };
     </script>
 </body>
 </html>
