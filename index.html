@@ -24,13 +24,13 @@
         }
 
         h1 {
-            font-size: 5vw;
-            margin-top: 5px;
+            font-size: 8vw;
+            margin-top: 10px;
             text-shadow: 0 0 20px #ff4500, 0 0 30px #ff4500;
         }
 
         #score {
-            font-size: 4vw;
+            font-size: 6vw;
             margin: 10px;
             text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
         }
@@ -38,7 +38,7 @@
         #life-bar {
             width: 90%;
             max-width: 400px;
-            height: 25px;
+            height: 30px;
             background-color: #333;
             border: 2px solid #00ff00;
             margin: 10px auto;
@@ -56,20 +56,35 @@
 
         .meteor, .skull {
             position: absolute;
-            font-size: 6vw;
+            font-size: 10vw; /* Größere Emojis */
             cursor: pointer;
             animation: fall 7s linear forwards;
             filter: drop-shadow(0 0 10px #ff4500);
         }
 
+        .meteor:hover, .skull:hover {
+            transform: scale(1.1); /* Visuelles Feedback beim Überfahren */
+        }
+
+        .meteor::after, .skull::after {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%; /* Größere Hitbox */
+            height: 120%;
+            border-radius: 50%;
+            background: transparent;
+        }
+
         @keyframes fall {
-            from { top: -10%; }
+            from { top: -15%; }
             to { top: 100%; }
         }
 
         .game-over {
             display: none;
-            font-size: 5vw;
+            font-size: 6vw;
             color: #ff0000;
             text-shadow: 0 0 20px black, 0 0 30px black;
             margin-top: 20px;
@@ -77,8 +92,8 @@
 
         #try-again {
             display: block;
-            font-size: 4vw;
-            padding: 10px 20px;
+            font-size: 5vw;
+            padding: 15px 25px;
             color: white;
             background-color: #ff4500;
             border: none;
@@ -124,7 +139,8 @@
             object.innerText = isSkull ? "☠️" : "☄️";
             document.body.appendChild(object);
 
-            object.style.left = `${Math.random() * window.innerWidth}px`;
+            object.style.left = `${Math.random() * (window.innerWidth - 80)}px`; // Bleibt im sichtbaren Bereich
+            object.style.top = "-10%";
 
             object.addEventListener("click", function () {
                 object.remove();
@@ -177,7 +193,7 @@
 
         function spawnObjects() {
             createObject();
-            meteorTimer = setInterval(createObject, 900);
+            meteorTimer = setInterval(createObject, 800); // Schnelleres Spawnen für mehr Objekte
         }
 
         window.onload = () => {
