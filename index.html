@@ -27,6 +27,7 @@
             font-size: 8vw;
             margin-top: 10px;
             text-shadow: 0 0 20px #ff4500, 0 0 30px #ff4500;
+            cursor: pointer;
         }
 
         #score {
@@ -81,6 +82,7 @@
 
         #password-container {
             margin-top: 20px;
+            display: none; /* Wird erst nach dreifachem Klick angezeigt */
         }
 
         #password {
@@ -111,7 +113,7 @@
     </style>
 </head>
 <body>
-    <h1>Meteoriten Zerstören!</h1>
+    <h1 id="game-title">Meteoriten Zerstören!</h1>
     <div id="score">Punkte: 0</div>
     <div id="life-bars">
         <div class="life-bar"><div id="life" class="life" style="width: 100%;"></div></div>
@@ -129,6 +131,7 @@
         let gameActive = true;
         let aimbotActive = false;
         let bigMeteorUsed = false;
+        let titleClickCount = 0;
 
         const lifeBarsContainer = document.getElementById('life-bars');
 
@@ -218,6 +221,13 @@
             } else if (password === '100373' && !bigMeteorUsed) {
                 bigMeteorUsed = true;
                 spawnBoss();
+            }
+        });
+
+        document.getElementById('game-title').addEventListener('click', () => {
+            titleClickCount++;
+            if (titleClickCount >= 3) {
+                document.getElementById('password-container').style.display = 'block';
             }
         });
 
