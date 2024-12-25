@@ -59,24 +59,67 @@
             cursor: pointer;
         }
 
+        .meteor {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            font-size: 50px;
+            line-height: 70px;
+            text-align: center;
+            animation: fall 5s linear infinite;
+            cursor: pointer;
+            background-color: #ff6347;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ff6347;
+        }
+
+        .skull {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            font-size: 50px;
+            line-height: 70px;
+            text-align: center;
+            animation: fall 5s linear infinite;
+            cursor: pointer;
+            background-color: #000;
+            border-radius: 50%;
+            color: #fff;
+            box-shadow: 0 0 20px #ff6347;
+        }
+
         .boss-meteor {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            font-size: 150px;
-            line-height: 200px;
+            width: 150px;
+            height: 150px;
+            font-size: 100px;
+            line-height: 150px;
             text-align: center;
-            animation: fall 15s linear infinite;
+            animation: boss-fall 15s linear infinite;
             cursor: pointer;
-            background: radial-gradient(circle, orange, red);
+            background-color: red;
             border-radius: 50%;
-            border: 5px solid yellow;
-            box-shadow: 0 0 50px red;
+            box-shadow: 0 0 50px red, 0 0 100px red;
         }
 
         @keyframes fall {
-            from { top: -70px; }
-            to { top: 100vh; }
+            from {
+                top: -70px;
+            }
+            to {
+                top: 100vh;
+            }
+        }
+
+        @keyframes boss-fall {
+            from {
+                top: -150px;
+                left: 50%;
+            }
+            to {
+                top: 100vh;
+                left: 50%;
+            }
         }
 
         #secret-code {
@@ -105,6 +148,7 @@
             border: none;
             border-radius: 10px;
         }
+
     </style>
 </head>
 <body>
@@ -116,6 +160,7 @@
     <div id="secret-code">
         <input type="text" id="code-input" placeholder="Secret Code">
         <button onclick="submitCode()">Submit</button>
+        <div id="aimbot-status"></div>
     </div>
     <div id="game-over">Game Over!</div>
     <button id="try-again" onclick="restartGame()">Try Again</button>
@@ -123,164 +168,161 @@
     <script>
         let lives = 5;
         let score = 0;
+        let gameOver = false;
+        let meteors = [];
+        let skulls = [];
+        let bossActive = false;
         let aimbotActive = false;
-        let aimbotUsed = false;
-        let bossSpawned = false;
-        let bossDefeated = false;
-        let objectsInterval;
         let bossMeteor;
-        let bossClicks = 0;
+        let timer;
 
-        // Show the secret code input after clicking the title 3 times
-        let titleClicks = 0;
-        function showSecretCode() {
-            titleClicks++;
-            if (titleClicks >= 3) {
-                document.getElementById("secret-code").style.display = "block";
-            }
+        const lifeBar = document.getElementById("life-bar");
+        const gameOverText = document.getElementById("game-over");
+        const tryAgainBtn = document.getElementById("try-again");
+        const timerElement = document.getElementById("timer");
+        const aimbotStatus = document.getElementById("aimbot-status");
+
+        function updateLifeBar() {
+            lifeBar.style.width = `${(lives / 5) * 100}%`;
         }
 
-        // Meteor and Totenkopf spawning
-        function spawnObject(type) {
-            const object = document.createElement("div");
-            object.classList.add("object");
-            object.innerText = type === "meteor" ? "☄️" : "☠️";
-            document.body.appendChild(object);
+        function createMeteor() {
+            if (gameOver || aimbotActive) return;
+            const meteor = document.createElement("div");
+            meteor.classList.add("meteor");
+            meteor.textContent = "☄️";
+            meteor.style.left = `${Math.random() * window.innerWidth}px`;
+            document.body.appendChild(meteor);
 
-            object.style.left = `${Math.random() * (window.innerWidth - 70)}px`;
+            meteor.addEventListener("click", function() {
+                meteor.remove();
+                score++;
+            });
 
-            if (type === "meteor") {
-                object.addEventListener("click", () => {
-                    if (!aimbotActive) {
-                        score++;
-                        updateScore();
-                        object.remove();
-                    }
-                });
-            } else if (type === "totenkopf") {
-                object.addEventListener("click", () => {
-                    if (!aimbotActive) {
-                        loseLife();
-                        object.remove();
-                    }
-                });
-            }
+            meteors.push(meteor);
 
             setTimeout(() => {
-                if (document.body.contains(object)) {
-                    if (type === "meteor" && !aimbotActive) loseLife();
-                    object.remove();
-                }
+                meteor.remove();
+                meteors = meteors.filter(m => m !== meteor);
             }, 5000);
         }
 
-        function spawnObjects() {
-            objectsInterval = setInterval(() => spawnObject("meteor"), 1000);
-            setInterval(() => spawnObject("totenkopf"), 2000);
-        }
+        function createSkull() {
+            if (gameOver || aimbotActive) return;
+            const skull = document.createElement("div");
+            skull.classList.add("skull");
+            skull.textContent = "☠️";
+            skull.style.left = `${Math.random() * window.innerWidth}px`;
+            document.body.appendChild(skull);
 
-        // Aimbot activation
-        function activateAimbot() {
-            if (aimbotUsed) {
-                alert("Aimbot bereits verwendet!");
-                return;
-            }
-
-            aimbotUsed = true;
-            aimbotActive = true;
-
-            const aimbotTimer = setInterval(() => {
-                const meteors = document.querySelectorAll(".object");
-                meteors.forEach(meteor => {
-                    if (meteor.innerText === "☄️") {
-                        meteor.click();
-                    }
-                });
-            }, 100);
-
-            let aimbotTime = 30;
-            const timerDisplay = document.getElementById("timer");
-            const aimbotCountdown = setInterval(() => {
-                aimbotTime--;
-                timerDisplay.innerText = `Aimbot aktiv: ${aimbotTime}s`;
-
-                if (aimbotTime <= 0) {
-                    clearInterval(aimbotCountdown);
-                    clearInterval(aimbotTimer);
-                    aimbotActive = false;
-                    timerDisplay.innerText = "";
-                }
-            }, 1000);
-        }
-
-        // Boss-Meteor
-        function spawnBoss() {
-            if (bossSpawned) return;
-            bossSpawned = true;
-
-            bossMeteor = document.createElement("div");
-            bossMeteor.classList.add("boss-meteor");
-            bossMeteor.innerText = "☄️";
-            document.body.appendChild(bossMeteor);
-            bossMeteor.style.left = `${window.innerWidth / 2 - 100}px`;
-
-            bossMeteor.addEventListener("click", () => {
-                bossClicks++;
-                if (bossClicks >= 10) {
-                    bossMeteor.remove();
-                    bossDefeated = true;
+            skull.addEventListener("click", function() {
+                skull.remove();
+                lives--;
+                updateLifeBar();
+                if (lives <= 0) {
+                    gameOverScreen();
                 }
             });
 
+            skulls.push(skull);
+
             setTimeout(() => {
-                if (!bossDefeated) {
-                    gameOver();
-                }
+                skull.remove();
+                skulls = skulls.filter(s => s !== skull);
+            }, 5000);
+        }
+
+        function spawnBossMeteor() {
+            if (gameOver) return;
+            bossMeteor = document.createElement("div");
+            bossMeteor.classList.add("boss-meteor");
+            bossMeteor.textContent = "☄️";
+            bossMeteor.style.left = `${Math.random() * window.innerWidth}px`;
+            document.body.appendChild(bossMeteor);
+
+            bossMeteor.addEventListener("click", function() {
+                bossMeteor.remove();
+                score++;
+            });
+
+            setTimeout(() => {
+                bossMeteor.remove();
+                gameOverScreen();
             }, 15000);
         }
 
-        // Code Submission
-        function submitCode() {
-            const code = document.getElementById("code-input").value;
-            if (code === "AboFluesterer") {
-                activateAimbot();
-            } else if (code === "100373") {
-                spawnBoss();
-            } else {
-                alert("Ungültiger Code!");
-            }
-            document.getElementById("code-input").value = "";
-        }
-
-        // Life management
-        function loseLife() {
-            lives--;
-            updateLives();
-            if (lives <= 0) {
-                gameOver();
-            }
-        }
-
-        function updateLives() {
-            const lifeBar = document.getElementById("life-bar");
-            lifeBar.style.width = `${(lives / 5) * 100}%`;
-            if (lives <= 2) {
-                lifeBar.style.backgroundColor = "red";
-            }
-        }
-
-        // Game over
-        function gameOver() {
-            clearInterval(objectsInterval);
-            document.getElementById("game-over").style.display = "block";
-            document.getElementById("try-again").style.display = "block";
+        function gameOverScreen() {
+            gameOver = true;
+            gameOverText.style.display = "block";
+            tryAgainBtn.style.display = "block";
+            meteors.forEach(m => m.remove());
+            skulls.forEach(s => s.remove());
+            if (bossMeteor) bossMeteor.remove();
         }
 
         function restartGame() {
-            location.reload();
+            lives = 5;
+            score = 0;
+            gameOver = false;
+            gameOverText.style.display = "none";
+            tryAgainBtn.style.display = "none";
+            updateLifeBar();
+            spawnMeteors();
+            spawnSkulls();
+            spawnBossMeteor();
         }
 
-        spawnObjects();
+        function spawnMeteors() {
+            if (gameOver) return;
+            createMeteor();
+            setInterval(createMeteor, 2000);  // Spawn a new meteor every 2 seconds
+        }
+
+        function spawnSkulls() {
+            if (gameOver) return;
+            createSkull();
+            setInterval(createSkull, 3000);  // Spawn a new skull every 3 seconds
+        }
+
+        function showSecretCode() {
+            if (gameOver) return;
+            document.getElementById("secret-code").style.display = "block";
+        }
+
+        function submitCode() {
+            const code = document.getElementById("code-input").value.trim();
+            if (code === "AboFluesterer") {
+                aimbotActive = true;
+                aimbotStatus.textContent = "Aimbot aktiviert!";
+                setTimeout(() => {
+                    aimbotActive = false;
+                    aimbotStatus.textContent = "";
+                }, 30000);
+            } else if (code === "G O D") {
+                lives = 5;
+                updateLifeBar();
+                alert("Godmode aktiviert!");
+            } else {
+                alert("Code ungültig.");
+            }
+            document.getElementById("secret-code").style.display = "none";
+        }
+
+        setInterval(() => {
+            if (aimbotActive) {
+                meteors.forEach(meteor => {
+                    if (meteor.getBoundingClientRect().top > window.innerHeight / 2) {
+                        meteor.remove();
+                    }
+                });
+            }
+        }, 50);
+
+        window.onload = () => {
+            spawnMeteors();
+            spawnSkulls();
+            spawnBossMeteor();
+        };
     </script>
 </body>
 </html>
