@@ -64,25 +64,15 @@
 
         .meteor, .skull {
             position: absolute;
-            font-size: 10vw; /* Größere Emojis */
+            font-size: 10vw;
             cursor: pointer;
             animation: fall 7s linear forwards;
             filter: drop-shadow(0 0 10px #ff4500);
         }
 
-        .boss {
-            position: absolute;
-            font-size: 25vw; /* Größer als normale Meteore */
-            color: #ff4500;
-            cursor: pointer;
-            font-weight: bold;
-            filter: drop-shadow(0 0 30px #ff0000);
-            animation: none; /* Boss bewegt sich anders */
-        }
-
         #password-container {
             margin-top: 20px;
-            display: none; /* Wird erst nach dreifachem Klick angezeigt */
+            display: none;
         }
 
         #password {
@@ -144,12 +134,10 @@
     <script>
         let score = 0;
         let lives = 5;
-        let meteorTimer;
         let gameActive = true;
+        let meteorTimer;
         let aimbotActive = false;
         let bigMeteorUsed = false;
-        let aimbotTimer;
-        let titleClickCount = 0;
 
         const lifeBarsContainer = document.getElementById('life-bars');
         const passwordError = document.getElementById('password-error');
@@ -164,13 +152,6 @@
                     bar.style.width = '0%';
                 }
             });
-        }
-
-        function addLifeBar() {
-            const newBar = document.createElement('div');
-            newBar.className = 'life-bar';
-            newBar.innerHTML = '<div class="life" style="width: 100%;"></div>';
-            lifeBarsContainer.appendChild(newBar);
         }
 
         function spawnObject(type = 'meteor') {
@@ -195,6 +176,18 @@
                 }
                 object.remove();
             });
+
+            const duration = type === 'meteor' ? 7000 : 9000;
+            setTimeout(() => {
+                object.remove();
+            }, duration);
+        }
+
+        function startGame() {
+            meteorTimer = setInterval(() => {
+                spawnObject('meteor');
+                if (Math.random() < 0.3) spawnObject('skull');
+            }, 1500);
         }
 
         function updateScore() {
@@ -203,19 +196,20 @@
 
         function activateAimbot() {
             aimbotActive = true;
-            aimbotTimerElement.style.display = 'block';
             let timeLeft = 30;
 
-            aimbotTimer = setInterval(() => {
+            const timer = setInterval(() => {
                 timeLeft--;
                 aimbotTimerElement.innerText = `Aimbot endet in: ${timeLeft}s`;
 
                 if (timeLeft <= 0) {
-                    clearInterval(aimbotTimer);
+                    clearInterval(timer);
                     aimbotTimerElement.style.display = 'none';
                     aimbotActive = false;
                 }
             }, 1000);
+
+            aimbotTimerElement.style.display = 'block';
         }
 
         function endGame() {
@@ -230,7 +224,6 @@
                 if (aimbotActive) {
                     passwordError.innerText = 'Code bereits eingelöst!';
                 } else {
-                    passwordError.innerText = '';
                     activateAimbot();
                     document.getElementById('password-container').style.display = 'none';
                 }
@@ -238,9 +231,9 @@
                 if (bigMeteorUsed) {
                     passwordError.innerText = 'Code bereits eingelöst!';
                 } else {
-                    passwordError.innerText = '';
                     bigMeteorUsed = true;
-                    addLifeBar();
+                    lives++;
+                    updateLifeBars();
                     document.getElementById('password-container').style.display = 'none';
                 }
             } else {
@@ -249,18 +242,8 @@
         });
 
         document.getElementById('game-title').addEventListener('click', () => {
-            titleClickCount++;
-            if (titleClickCount >= 3) {
-                document.getElementById('password-container').style.display = 'block';
-            }
+            document.getElementById('password-container').style.display = 'block';
         });
-
-        function startGame() {
-            meteorTimer = setInterval(() => {
-                spawnObject('meteor');
-                if (Math.random() < 0.3) spawnObject('skull');
-            }, 1000);
-        }
 
         startGame();
     </script>
