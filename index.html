@@ -310,4 +310,18 @@
                 }, 30000);
             } else if (code === "G O D") {
                 lives = 5;
-                update
+                updateLifeBar();
+                aimbotActive = false;
+                aimbotStatus.textContent = "Godmode aktiviert!";
+            } else {
+                aimbotStatus.textContent = "Code ungültig!";
+            }
+            document.getElementById("code-input").value = "";
+        }
+
+        // Start the game
+        spawnMeteors();
+        spawnSkulls();
+    </script>
+</body>
+</html>
