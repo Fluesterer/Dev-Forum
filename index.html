@@ -51,25 +51,12 @@
         <div id="comments"></div>
     </div>
     <script>
-        let comments = [];
-
-        function postComment() {
-            const nickname = document.getElementById('nickname').value;
-            const comment = document.getElementById('comment').value;
-
-            if (nickname && comment) {
-                comments.push({ nickname, text: comment });
-                loadComments();
-                document.getElementById('nickname').value = '';
-                document.getElementById('comment').value = '';
-            } else {
-                alert('Bitte Nickname und Kommentar ausfüllen!');
-            }
-        }
-
+        // Lade Kommentare aus dem LocalStorage, falls vorhanden
         function loadComments() {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
             const commentsDiv = document.getElementById('comments');
-            commentsDiv.innerHTML = '';
+            commentsDiv.innerHTML = '';  // Leere die Kommentare
+
             comments.forEach(comment => {
                 const div = document.createElement('div');
                 div.classList.add('comment');
@@ -78,7 +65,31 @@
             });
         }
 
-        // Lade Kommentare beim ersten Laden der Seite
+        // Speichere den neuen Kommentar im LocalStorage
+        function postComment() {
+            const nickname = document.getElementById('nickname').value;
+            const comment = document.getElementById('comment').value;
+
+            if (nickname && comment) {
+                // Hol die aktuellen Kommentare aus dem LocalStorage
+                const comments = JSON.parse(localStorage.getItem('comments')) || [];
+                comments.push({ nickname, text: comment });
+
+                // Speichere die neuen Kommentare im LocalStorage
+                localStorage.setItem('comments', JSON.stringify(comments));
+
+                // Lade die Kommentare neu
+                loadComments();
+
+                // Leere die Eingabefelder
+                document.getElementById('nickname').value = '';
+                document.getElementById('comment').value = '';
+            } else {
+                alert('Bitte Nickname und Kommentar ausfüllen!');
+            }
+        }
+
+        // Kommentare beim Laden der Seite anzeigen
         window.onload = loadComments;
     </script>
 </body>
