@@ -55,10 +55,14 @@
         }
 
         .meteor {
+            font-size: 100px;
+            color: orange;
             animation: fall 5s linear infinite;
         }
 
         .skull {
+            font-size: 100px;
+            color: red;
             animation: fall 5s linear infinite;
         }
 
@@ -167,8 +171,7 @@
             const meteor = document.createElement("div");
             meteor.classList.add("meteor");
             meteor.textContent = "☄️";
-            meteor.style.position = "absolute";
-            meteor.style.left = `${Math.random() * 90}vw`;
+            meteor.style.left = `${10 + Math.random() * 80}vw`;
             meteor.style.top = "-50px";
             document.body.appendChild(meteor);
 
@@ -211,7 +214,6 @@
         function submitCode() {
             const code = document.getElementById("code-input").value.trim();
 
-            // Check if a code is already active
             if (activeCode) {
                 alert("Ein Code ist bereits aktiv. Bitte warte, bis der Effekt endet.");
                 return;
@@ -245,7 +247,6 @@
             bossMeteor.style.top = "10vh";
             bossMeteor.style.left = "40vw";
             bossMeteor.style.transition = "all 0.5s";
-            bossMeteor.style.cursor = "pointer";
 
             document.body.appendChild(bossMeteor);
 
@@ -257,7 +258,9 @@
                 } else {
                     bossMeteor.remove();
                     bossActive = false;
-                    activeCode = null; // Reset active code
+                    activeCode = null;
+                    lives += 5; // Add a new life bar
+                    updateLifeBar();
                 }
             });
 
@@ -265,7 +268,7 @@
                 if (bossHealth > 0) {
                     bossMeteor.remove();
                     bossActive = false;
-                    activeCode = null; // Reset active code
+                    activeCode = null;
                 }
             }, 15000);
         }
@@ -281,7 +284,7 @@
                     clearInterval(timerInterval);
                     aimbotActive = false;
                     timerElement.textContent = "";
-                    activeCode = null; // Reset active code
+                    activeCode = null;
                 }
             }, 1000);
         }
@@ -297,24 +300,9 @@
                     clearInterval(timerInterval);
                     godModeActive = false;
                     timerElement.textContent = "";
-                    activeCode = null; // Reset active code
+                    activeCode = null;
                 }
             }, 1000);
         }
 
-        function showSecretCode() {
-            secretCode.style.display = "block";
-        }
-
-        function gameOver() {
-            document.getElementById("game-over").style.display = "block";
-            document.getElementById("try-again").style.display = "block";
-        }
-
-        window.onload = () => {
-            updateLifeBar();
-            spawnMeteors();
-        };
-    </script>
-</body>
-</html>
+        function
