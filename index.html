@@ -8,7 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEEB; /* Himmelblauer Hintergrund */
+            background-color: #d0f0f8; /* Himmelblauer Hintergrund */
         }
         canvas {
             display: block;
@@ -32,12 +32,12 @@
         const hand = {
             x: 100,
             y: canvas.height / 2,
-            width: 50,
-            height: 50,
+            width: 60,
+            height: 60,
             velocity: 0,
-            gravity: 0.5,
+            gravity: 0.6,
             jumpStrength: -10,
-            color: 'brown'
+            color: '#8b4513'
         };
 
         // Chips
@@ -46,11 +46,11 @@
             y: Math.random() * (canvas.height - 100),
             width: 40,
             height: 40,
-            color: 'gold'
+            color: '#FFD700'
         };
 
         // Obstacles (Tische)
-        const obstacles = [];
+        let obstacles = [];
         const obstacleFrequency = 2000; // in ms
         const gapHeight = 150;
         const obstacleWidth = 80;
@@ -62,7 +62,7 @@
                 y: 0,
                 width: obstacleWidth,
                 height: topHeight,
-                color: 'darkgrey',
+                color: '#2e8b57',
                 isTop: true
             });
             obstacles.push({
@@ -70,7 +70,7 @@
                 y: topHeight + gapHeight,
                 width: obstacleWidth,
                 height: canvas.height - topHeight - gapHeight,
-                color: 'darkgrey',
+                color: '#2e8b57',
                 isTop: false
             });
         }
@@ -79,9 +79,8 @@
             hand.velocity += hand.gravity;
             hand.y += hand.velocity;
 
-            // Prevent hand from leaving the screen
-            if (hand.y < 0) hand.y = 0;
-            if (hand.y + hand.height > canvas.height) {
+            // Check if hand hits the ground or ceiling
+            if (hand.y < 0 || hand.y + hand.height > canvas.height) {
                 gameOver = true;
             }
         }
@@ -91,7 +90,7 @@
                 obstacle.x -= 5;
             });
 
-            // Remove obstacles that have moved off the screen
+            // Remove obstacles that move off the screen
             obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
         }
 
@@ -146,6 +145,16 @@
             });
         }
 
+        function drawBackground() {
+            // Sky
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Ground
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+        }
+
         function drawScore() {
             ctx.fillStyle = 'black';
             ctx.font = '20px Arial';
@@ -169,6 +178,7 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            drawBackground();
             moveHand();
             moveObstacles();
             checkCollisions();
@@ -196,7 +206,7 @@
                 score = 0;
                 hand.y = canvas.height / 2;
                 hand.velocity = 0;
-                obstacles.length = 0;
+                obstacles = [];
                 update();
             } else {
                 // Jump
