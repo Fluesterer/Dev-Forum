@@ -24,13 +24,13 @@
         }
 
         header h1 {
-            font-size: 3em;
+            font-size: 2em;
             margin: 0;
         }
 
         header p {
-            font-size: 1.2em;
-            margin: 10px 0 0;
+            font-size: 1em;
+            margin: 5px 0 0;
         }
 
         /* Navigation */
@@ -39,6 +39,7 @@
             color: white;
             display: flex;
             justify-content: space-around;
+            flex-wrap: wrap;
             padding: 10px 0;
             position: sticky;
             top: 0;
@@ -49,7 +50,8 @@
         nav a {
             color: white;
             text-decoration: none;
-            font-size: 1.1em;
+            font-size: 1em;
+            margin: 5px;
         }
 
         nav a:hover {
@@ -58,8 +60,8 @@
 
         /* Hero Section */
         .hero {
-            background: url('https://source.unsplash.com/1600x900/?books,learning') no-repeat center center/cover;
-            height: 60vh;
+            background: url('https://source.unsplash.com/1600x900/?books,knowledge') no-repeat center center/cover;
+            height: 50vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -69,11 +71,12 @@
         }
 
         .hero h2 {
-            font-size: 3em;
+            font-size: 2em;
+            margin: 0 10px;
         }
 
         .hero p {
-            font-size: 1.5em;
+            font-size: 1em;
         }
 
         /* Main Content */
@@ -84,34 +87,36 @@
         }
 
         section {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         section h2 {
             color: #00509e;
             border-left: 5px solid #00509e;
-            padding-left: 15px;
-            margin-bottom: 20px;
+            padding-left: 10px;
+            margin-bottom: 10px;
         }
 
         section p {
             text-align: justify;
+            font-size: 0.95em;
         }
 
         /* Zitate */
         .quote {
             background: #f0f8ff;
             border-left: 5px solid #00509e;
-            padding: 15px;
+            padding: 10px;
             font-style: italic;
-            margin: 20px 0;
+            margin: 15px 0;
+            font-size: 0.9em;
         }
 
         /* Karten-Layout */
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .card {
@@ -130,13 +135,13 @@
         }
 
         .card h3 {
-            margin: 15px;
-            font-size: 1.2em;
+            margin: 10px;
+            font-size: 1em;
         }
 
         .card p {
-            margin: 0 15px 15px;
-            font-size: 0.9em;
+            margin: 0 10px 10px;
+            font-size: 0.85em;
             color: #555;
         }
 
@@ -150,13 +155,9 @@
             background: #003d73;
             color: white;
             text-align: center;
-            padding: 20px 10px;
-            margin-top: 40px;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 0.9em;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 0.85em;
         }
     </style>
 </head>
@@ -164,7 +165,7 @@
     <!-- Header -->
     <header>
         <h1>Wissen und Lernen</h1>
-        <p>Entdecke, was möglich ist, wenn du dich auf die Reise des Wissens begibst.</p>
+        <p>Entdecke die Kraft des Wissens und der Bildung</p>
     </header>
 
     <!-- Navigation -->
@@ -178,8 +179,8 @@
     <!-- Hero Section -->
     <div class="hero">
         <div>
-            <h2>Die Welt des Wissens wartet auf dich</h2>
-            <p>Beginne heute deine Reise des Lernens und Entdeckens.</p>
+            <h2>Die Welt des Wissens wartet</h2>
+            <p>Starte jetzt deine Reise des Lernens!</p>
         </div>
     </div>
 
@@ -189,44 +190,43 @@
         <section id="warum">
             <h2>Warum Wissen wichtig ist</h2>
             <p>
-                Wissen ist die Grundlage für Fortschritt und Innovation. Es hilft uns, die Welt besser zu verstehen und die Herausforderungen des Lebens zu meistern. 
-                Ob in der Wissenschaft, Kunst oder Technologie – das Streben nach Wissen treibt die Menschheit an.
+                Wissen ist der Schlüssel zu persönlichem und gesellschaftlichem Fortschritt. Es hilft uns, die Welt um uns herum zu verstehen und Lösungen für die größten Herausforderungen zu finden.
             </p>
             <div class="quote">
-                "Der Geist ist kein Schiff, das beladen werden soll, sondern ein Feuer, das entzündet werden will." – Plutarch
+                "Bildung ist die mächtigste Waffe, die du verwenden kannst, um die Welt zu verändern." – Nelson Mandela
             </div>
         </section>
 
         <!-- Wissenschaft -->
         <section id="wissenschaft">
-            <h2>Die Wunder der Wissenschaft</h2>
+            <h2>Wissenschaft entdecken</h2>
             <p>
-                Wissenschaft hat unsere Welt revolutioniert. Von medizinischen Durchbrüchen bis hin zu Raumfahrt – sie zeigt, was möglich ist, wenn wir neugierig bleiben und die Welt hinterfragen.
+                Wissenschaft hat unsere Lebensweise transformiert – von der Medizin bis zur Technologie. Sie eröffnet neue Möglichkeiten, die Welt besser zu verstehen.
             </p>
             <div class="cards">
                 <div class="card">
-                    <img src="https://source.unsplash.com/400x300/?space" alt="Raumfahrt">
+                    <img src="https://source.unsplash.com/400x300/?space,exploration" alt="Raumfahrt">
                     <h3>Raumfahrt</h3>
-                    <p>Entdecke, wie die Menschheit es geschafft hat, den Weltraum zu erkunden und neue Horizonte zu öffnen.</p>
+                    <p>Erforsche die Weiten des Universums und die Wunder der Raumfahrt.</p>
                 </div>
                 <div class="card">
                     <img src="https://source.unsplash.com/400x300/?biology" alt="Biologie">
                     <h3>Biologie</h3>
-                    <p>Verstehe die Mechanismen des Lebens – von Zellen bis zu Ökosystemen.</p>
+                    <p>Entdecke die Geheimnisse des Lebens, von Zellen bis Ökosystemen.</p>
                 </div>
                 <div class="card">
                     <img src="https://source.unsplash.com/400x300/?physics" alt="Physik">
                     <h3>Physik</h3>
-                    <p>Erforsche die Grundgesetze des Universums, die unsere Existenz formen.</p>
+                    <p>Verstehe die Gesetze, die unser Universum regieren.</p>
                 </div>
             </div>
         </section>
 
         <!-- Geschichte -->
         <section id="geschichte">
-            <h2>Geschichte, die inspiriert</h2>
+            <h2>Geschichte</h2>
             <p>
-                Die Vergangenheit gibt uns Einblicke in die Zukunft. Durch das Studium der Geschichte lernen wir von den Erfolgen und Fehlern unserer Vorfahren.
+                Die Geschichte lehrt uns wichtige Lektionen und gibt uns eine Perspektive für die Zukunft. Sie ist eine Schatzkammer menschlicher Erfahrungen.
             </p>
             <div class="quote">
                 "Wer die Vergangenheit nicht kennt, ist dazu verdammt, sie zu wiederholen." – George Santayana
@@ -235,15 +235,15 @@
 
         <!-- Tipps zum Lernen -->
         <section id="lernen">
-            <h2>Tipps für effektives Lernen</h2>
+            <h2>Effektive Lerntipps</h2>
             <p>
-                Lernen muss nicht schwer sein. Hier sind einige Tipps, die dir helfen können, dein Wissen zu erweitern:
+                Lernen ist eine Kunst. Hier sind Tipps, die dir helfen, das Beste aus deiner Lernzeit herauszuholen:
             </p>
             <ul>
-                <li>Setze dir klare Ziele und bleibe fokussiert.</li>
-                <li>Nutze verschiedene Quellen wie Bücher, Videos und Diskussionen.</li>
-                <li>Verteile dein Lernen in kleinen Abschnitten über mehrere Tage.</li>
-                <li>Mache regelmäßige Pausen, um deinen Geist frisch zu halten.</li>
+                <li>Setze dir klare Ziele und bleibe motiviert.</li>
+                <li>Nutze verschiedene Medien wie Bücher, Videos und Kurse.</li>
+                <li>Lerne in kleinen Abschnitten und wiederhole regelmäßig.</li>
+                <li>Mach Pausen, um konzentriert zu bleiben.</li>
             </ul>
         </section>
     </main>
