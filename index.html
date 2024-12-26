@@ -3,150 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum: Thema XYZ</title>
+    <title>Forum: Coding/Modeling/Developing</title>
     <style>
+        /* Global Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
+            background-color: #121212;
+            color: #f1f1f1;
         }
 
         header {
-            background-color: #0078D7;
-            color: white;
+            background-color: #1a1a1a;
             text-align: center;
-            padding: 15px 20px;
+            padding: 20px;
+            border-bottom: 3px solid #4a148c;
         }
 
         header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            color: #7c4dff;
         }
 
         .container {
             max-width: 800px;
             margin: 20px auto;
-            background: white;
+            background: #1e1e2f;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
         }
 
-        .topic {
-            margin-bottom: 20px;
-        }
-
-        .topic h2 {
-            margin: 0 0 10px 0;
-            color: #333;
-        }
-
-        .comment-section {
-            margin-top: 30px;
-        }
-
-        .comment {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: #f9f9f9;
-        }
-
-        .comment h4 {
-            margin: 0 0 5px;
+        label {
             font-size: 1rem;
-            color: #0078D7;
+            color: #b3b3b3;
         }
 
-        .comment p {
-            margin: 0;
-            color: #555;
-        }
-
-        .comment-form {
-            margin-top: 20px;
-        }
-
-        .comment-form textarea {
+        input, textarea {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
             border-radius: 5px;
-            resize: none;
+            background-color: #2b2b3a;
+            color: #fff;
+            font-size: 1rem;
         }
 
-        .comment-form button {
-            margin-top: 10px;
-            background-color: #0078D7;
+        input:focus, textarea:focus {
+            outline: none;
+            border: 1px solid #7c4dff;
+        }
+
+        button {
+            background-color: #7c4dff;
             color: white;
             padding: 10px 15px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
-        .comment-form button:hover {
-            background-color: #005bb5;
+        button:hover {
+            background-color: #4a148c;
+        }
+
+        .comment {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #2b2b3a;
+            border-radius: 5px;
+            background: #2b2b3a;
+        }
+
+        .comment h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #7c4dff;
+        }
+
+        .comment p {
+            margin: 10px 0 0;
+            color: #cfcfcf;
         }
 
         footer {
             text-align: center;
-            background: #333;
-            color: white;
+            background: #1a1a1a;
+            color: #b3b3b3;
             padding: 10px 0;
             margin-top: 20px;
+        }
+
+        footer a {
+            color: #7c4dff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Forum: Thema XYZ</h1>
+        <h1>Forum: Coding/Modeling/Developing</h1>
     </header>
     <div class="container">
-        <div class="topic">
-            <h2>Thema: Was denkt ihr über XYZ?</h2>
-            <p>Diskutiert alles rund um XYZ und teilt eure Meinungen und Erfahrungen!</p>
+        <!-- Nickname Section -->
+        <div class="nickname-form">
+            <label for="nickname">Einmaligen Nickname erstellen:</label>
+            <input type="text" id="nickname" placeholder="Gib deinen Nickname ein..." required>
+            <button onclick="setNickname()">Bestätigen</button>
         </div>
+
+        <!-- Comment Section -->
+        <div class="comment-form" style="display:none;">
+            <label for="comment">Dein Kommentar:</label>
+            <textarea id="comment" rows="4" placeholder="Schreibe deinen Kommentar..."></textarea>
+            <button onclick="postComment()">Posten</button>
+        </div>
+
+        <!-- Comments Display -->
         <div class="comment-section">
             <h3>Kommentare</h3>
-            <!-- Beispiel für einen Kommentar -->
-            <div class="comment">
-                <h4>Max Mustermann</h4>
-                <p>Ich finde XYZ großartig, weil es viele Vorteile bietet!</p>
-            </div>
-            <div class="comment">
-                <h4>Lisa Müller</h4>
-                <p>Meiner Meinung nach gibt es aber auch einige Nachteile...</p>
-            </div>
-            <!-- Bereich für neue Kommentare -->
-            <div class="comment-form">
-                <h3>Neuen Kommentar hinzufügen</h3>
-                <textarea id="comment" rows="4" placeholder="Dein Kommentar..."></textarea>
-                <button onclick="postComment()">Posten</button>
-            </div>
+            <!-- Dynamische Kommentare -->
         </div>
     </div>
     <footer>
-        <p>&copy; 2024 Forum für XYZ. Alle Rechte vorbehalten.</p>
+        <p>© 2024 <a href="#">Coding Forum</a>. Alle Rechte vorbehalten.</p>
     </footer>
 
     <script>
-        function postComment() {
-            const commentText = document.getElementById('comment').value;
-            if (commentText.trim() === '') {
-                alert('Bitte schreibe einen Kommentar!');
+        let nickname = "";
+
+        // Nickname setzen und Kommentarformular anzeigen
+        function setNickname() {
+            const nicknameInput = document.getElementById('nickname').value.trim();
+            if (!nicknameInput) {
+                alert('Bitte gib einen gültigen Nickname ein.');
                 return;
             }
+            if (nicknameInput.length < 3 || nicknameInput.length > 15) {
+                alert('Der Nickname muss zwischen 3 und 15 Zeichen lang sein.');
+                return;
+            }
+
+            nickname = nicknameInput;
+            alert(`Willkommen, ${nickname}! Du kannst jetzt Kommentare posten.`);
+            document.querySelector('.nickname-form').style.display = 'none';
+            document.querySelector('.comment-form').style.display = 'block';
+        }
+
+        // Kommentar posten
+        function postComment() {
+            const commentText = document.getElementById('comment').value.trim();
+            if (!commentText) {
+                alert('Bitte schreibe einen Kommentar.');
+                return;
+            }
+
+            // Kommentar erstellen
             const commentSection = document.querySelector('.comment-section');
             const newComment = document.createElement('div');
             newComment.classList.add('comment');
             newComment.innerHTML = `
-                <h4>Unbekannter Nutzer</h4>
+                <h4>${nickname}</h4>
                 <p>${commentText}</p>
             `;
-            commentSection.insertBefore(newComment, commentSection.querySelector('.comment-form'));
+
+            // Kommentar hinzufügen
+            commentSection.appendChild(newComment);
             document.getElementById('comment').value = '';
         }
     </script>
