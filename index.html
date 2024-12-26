@@ -69,11 +69,11 @@
             display: flex;
             justify-content: center;
             margin: 20px;
+            gap: 10px;
         }
         .dice {
-            width: 50px;
-            height: 50px;
-            margin: 0 10px;
+            width: 100px;
+            height: 100px;
             background-color: #fff;
             border-radius: 5px;
             display: flex;
@@ -84,7 +84,15 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .dice img {
-            width: 100%;
+            width: 80%;
+            height: 80%;
+        }
+        .input-container {
+            margin-top: 20px;
+        }
+        .input-container input {
+            width: 120px;
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -93,9 +101,22 @@
     <h1>Zahlenraten Spiel</h1>
     <div class="container">
         <div id="game">
-            <p>Errate die Summe der zwei Würfel (zwischen 2 und 12):</p>
-            <input type="number" id="guess" class="input-field" min="2" max="12">
-            <button class="btn" onclick="checkGuess()">Roll</button>
+            <!-- Die Würfel oben -->
+            <div class="dice-container">
+                <div id="dice1" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 1"></div>
+                <div id="dice2" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 2"></div>
+            </div>
+
+            <!-- Der Roll-Button rechts neben den Würfeln -->
+            <div class="input-container">
+                <button class="btn" onclick="checkGuess()">Roll</button>
+            </div>
+
+            <!-- Eingabefeld für die Zahl -->
+            <div class="input-container">
+                <input type="number" id="guess" class="input-field" min="2" max="12" placeholder="Errate die Zahl">
+            </div>
+
             <p id="feedback"></p>
             <div id="gameover" class="gameover">Game Over! Du hast verloren!</div>
         </div>
@@ -107,11 +128,6 @@
         <p id="secret-feedback"></p>
         <p id="next-roll" class="next-roll"></p>
 
-        <div class="dice-container">
-            <!-- Die Würfel werden hier angezeigt -->
-            <div id="dice1" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 1"></div>
-            <div id="dice2" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 2"></div>
-        </div>
     </div>
 
     <script>
@@ -197,23 +213,4 @@
             }
 
             // Wenn der Code nicht existiert
-            document.getElementById('secret-feedback').textContent = "Dieser Code existiert nicht!";
-        }
-
-        function resetGame() {
-            score = 0;
-            secretUsed = false;
-            gameOver = false;
-            godMode = false;
-            allowlist = false; // Entferne den Allowlist-Zugang nach dem Reset
-            document.getElementById('gameover').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('feedback').textContent = "";
-            document.getElementById('secret-feedback').textContent = "";
-            document.getElementById('score').textContent = score;
-
-            // Setze die Würfel zurück
-            dice1 = 1;
-            dice2 = 1;
-            sum = 2;
-            updateDiceDisplay();
+            document.getElementById('secret-feedback').textContent = "Dieser Code existiert
