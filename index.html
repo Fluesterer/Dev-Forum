@@ -3,306 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meteoriten Zerstören!</title>
+    <title>Cube guesser</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #1e3c72, #2a5298);
-            color: white;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        h1 {
-            font-size: 8vw;
-            margin-top: 10px;
-            text-shadow: 0 0 20px #ff4500, 0 0 30px #ff4500;
-            cursor: pointer;
-        }
-
-        #life-bars {
+            background-color: #2C3E50;
+            color: #ECF0F1;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            margin: 20px;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
         }
-
-        .life-bar {
-            width: 90%;
-            max-width: 400px;
-            height: 30px;
-            background-color: #333;
-            border: 2px solid #00ff00;
-            margin: 10px 0;
-            position: relative;
-            border-radius: 15px;
-            box-shadow: 0 0 10px #00ff00, 0 0 15px #00ff00;
-        }
-
-        .life-bar-inner {
-            width: 100%;
-            height: 100%;
-            background-color: #00ff00;
-            border-radius: 15px;
-        }
-
-        .object {
-            position: absolute;
-            font-size: 80px;
-            cursor: pointer;
-        }
-
-        .meteor {
-            font-size: 100px;
-            color: orange;
-            animation: fall 5s linear infinite;
-        }
-
-        .skull {
-            font-size: 100px;
-            color: red;
-            animation: fall 5s linear infinite;
-        }
-
-        @keyframes fall {
-            from {
-                top: -50px;
-            }
-            to {
-                top: 100vh;
-            }
-        }
-
-        #secret-code {
-            display: none;
-            margin-top: 20px;
-        }
-
-        #timer {
-            font-size: 2em;
-            margin-top: 20px;
-        }
-
-        #game-over {
-            display: none;
+        h1 {
             font-size: 3em;
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
-
-        #try-again {
-            display: none;
-            margin-top: 20px;
+        .container {
+            text-align: center;
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background-color: #34495E;
+            color: #ECF0F1;
+        }
+        .btn {
             padding: 10px 20px;
             font-size: 1.5em;
-            cursor: pointer;
-            background-color: #00ff00;
+            background-color: #27AE60;
             border: none;
-            border-radius: 10px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
         }
-
-        .explosion {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background-color: orange;
-            border-radius: 50%;
-            box-shadow: 0 0 20px yellow, 0 0 30px red;
-            animation: explosionEffect 0.5s ease-out forwards;
+        .btn:hover {
+            background-color: #2ECC71;
         }
-
-        @keyframes explosionEffect {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.5);
-                opacity: 0.7;
-            }
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
+        .secret-code {
+            font-size: 1.2em;
+            background-color: #7F8C8D;
+            margin-bottom: 10px;
+        }
+        .gameover {
+            display: none;
+            font-size: 2em;
+            color: #E74C3C;
+        }
+        .correct {
+            color: #2ECC71;
+        }
+        .wrong {
+            color: #E74C3C;
+        }
+        .rolling {
+            font-size: 5em;
+            animation: roll 1s infinite;
+        }
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(360deg); }
+            100% { transform: rotate(720deg); }
+        }
+        .next-roll {
+            font-size: 1.5em;
+            color: #ECF0F1;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-    <h1 id="game-title" onclick="showSecretCode()">Meteoriten Zerstören!</h1>
-    <div id="life-bars">
-        <div class="life-bar"><div class="life-bar-inner" id="life-bar"></div></div>
+
+    <h1>Zahlenraten Spiel</h1>
+    <div class="container">
+        <div id="game">
+            <p>Errate eine Zahl zwischen 1 und 6:</p>
+            <input type="number" id="guess1" class="input-field" min="1" max="6">
+            <input type="number" id="guess2" class="input-field" min="1" max="6">
+            <button class="btn" onclick="checkGuess()">Würfeln</button>
+            <p id="feedback"></p>
+            <div id="gameover" class="gameover">Game Over! Du hast verloren!</div>
+        </div>
+        <div id="roll-result" class="rolling">🎲</div>
+        <p>Punkte: <span id="score">0</span></p>
+
+        <input type="text" id="secret-code" class="input-field secret-code" placeholder="Geheimer Code (optional)">
+        <button class="btn" onclick="useSecretCode()">Code verwenden</button>
+        <p id="secret-feedback"></p>
+        <p id="next-roll" class="next-roll"></p>
     </div>
-    <div id="timer"></div>
-    <div id="secret-code">
-        <input type="text" id="code-input" placeholder="Secret Code">
-        <button onclick="submitCode()">Submit</button>
-        <div id="aimbot-status"></div>
-    </div>
-    <div id="game-over">Game Over!</div>
-    <button id="try-again" onclick="restartGame()">Try Again</button>
 
     <script>
-        let lives = 5;
-        let meteors = [];
-        let skulls = [];
-        let bossActive = false;
-        let bossMeteor;
-        let bossHealth = 10;
-        let activeCode = null; // Track which code is active
-        let aimbotActive = false;
-        let godModeActive = false;
-        let timerInterval;
-        let aimbotTimer = 30;
-        let godModeTimer = 30;
+        let score = 0;
+        let secretUsed = false;
+        let nextRoll = -1; // Nächster Wurf wird hier bestimmt
+        const secretCode = "AboFluesterer";
 
-        const lifeBar = document.getElementById("life-bar");
-        const secretCode = document.getElementById("secret-code");
-        const timerElement = document.getElementById("timer");
-
-        function updateLifeBar() {
-            lifeBar.style.width = `${(lives / 5) * 100}%`;
-            if (lives <= 0) {
-                gameOver();
-            }
+        function rollDice() {
+            return Math.floor(Math.random() * 6) + 1;
         }
 
-        function createMeteor() {
-            const meteor = document.createElement("div");
-            meteor.classList.add("meteor");
-            meteor.textContent = "☄️";
-            meteor.style.left = `${10 + Math.random() * 80}vw`;
-            meteor.style.top = "-50px";
-            document.body.appendChild(meteor);
+        function checkGuess() {
+            const guess1 = parseInt(document.getElementById('guess1').value);
+            const guess2 = parseInt(document.getElementById('guess2').value);
+            nextRoll = rollDice(); // Bestimme die nächste Zahl
+            const rolled = rollDice();
 
-            meteor.addEventListener("click", function () {
-                createExplosion(meteor);
-                meteor.remove();
-            });
+            document.getElementById('roll-result').textContent = `Geworfene Zahl: ${rolled}`;
 
-            setTimeout(() => {
-                if (!meteor.removed) {
-                    if (!godModeActive) {
-                        lives--;
-                        updateLifeBar();
-                    }
-                    meteor.remove();
-                }
-            }, 5000);
-        }
-
-        function createExplosion(meteor) {
-            const explosion = document.createElement("div");
-            explosion.classList.add("explosion");
-            explosion.style.left = meteor.offsetLeft + "px";
-            explosion.style.top = meteor.offsetTop + "px";
-            document.body.appendChild(explosion);
-
-            setTimeout(() => {
-                explosion.remove();
-            }, 500);
-        }
-
-        function spawnMeteors() {
-            setInterval(() => {
-                if (!bossActive) {
-                    createMeteor();
-                }
-            }, 2000);
-        }
-
-        function submitCode() {
-            const code = document.getElementById("code-input").value.trim();
-
-            if (activeCode) {
-                alert("Ein Code ist bereits aktiv. Bitte warte, bis der Effekt endet.");
-                return;
-            }
-
-            if (code === "AboFluesterer") {
-                activeCode = "aimbot";
-                activateAimbot();
-            } else if (code === "100373") {
-                activeCode = "boss";
-                spawnBossMeteor();
-            } else if (code === "G O D") {
-                activeCode = "godmode";
-                activateGodMode();
+            if (guess1 === nextRoll && guess2 === nextRoll) {
+                score += 10;
+                document.getElementById('feedback').textContent = "Richtig geraten!";
+                document.getElementById('feedback').className = 'correct';
             } else {
-                alert("Ungültiger Code!");
+                document.getElementById('feedback').textContent = "Falsch geraten! Versuche es nochmal.";
+                document.getElementById('feedback').className = 'wrong';
+                setTimeout(() => {
+                    document.getElementById('gameover').style.display = 'block';
+                    document.getElementById('game').style.display = 'none';
+                }, 2000);
+            }
+
+            document.getElementById('score').textContent = score;
+        }
+
+        function useSecretCode() {
+            const code = document.getElementById('secret-code').value;
+            if (code === secretCode && !secretUsed) {
+                secretUsed = true;
+                document.getElementById('secret-feedback').textContent = `Geheimer Code verwendet! Die nächste Zahl wird: ${nextRoll}`;
+                document.getElementById('next-roll').textContent = `Die nächste Zahl ist: ${nextRoll}`;
+            } else if (code !== secretCode) {
+                document.getElementById('secret-feedback').textContent = "Falscher Code!";
+            } else {
+                document.getElementById('secret-feedback').textContent = "Code bereits verwendet!";
             }
         }
+    </script>
 
-        function spawnBossMeteor() {
-            if (bossActive) return;
-
-            bossActive = true;
-
-            bossMeteor = document.createElement("div");
-            bossMeteor.textContent = "☄️";
-            bossMeteor.style.width = "200px";
-            bossMeteor.style.height = "200px";
-            bossMeteor.style.fontSize = "150px";
-            bossMeteor.style.position = "absolute";
-            bossMeteor.style.top = "10vh";
-            bossMeteor.style.left = "40vw";
-            bossMeteor.style.transition = "all 0.5s";
-
-            document.body.appendChild(bossMeteor);
-
-            bossMeteor.addEventListener("click", function () {
-                bossHealth--;
-                if (bossHealth > 0) {
-                    bossMeteor.style.left = `${Math.random() * 80}vw`;
-                    bossMeteor.style.top = `${Math.random() * 80}vh`;
-                } else {
-                    bossMeteor.remove();
-                    bossActive = false;
-                    activeCode = null;
-                    lives += 5; // Add a new life bar
-                    updateLifeBar();
-                }
-            });
-
-            setTimeout(() => {
-                if (bossHealth > 0) {
-                    bossMeteor.remove();
-                    bossActive = false;
-                    activeCode = null;
-                }
-            }, 15000);
-        }
-
-        function activateAimbot() {
-            aimbotActive = true;
-            timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
-            timerInterval = setInterval(() => {
-                aimbotTimer--;
-                timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
-
-                if (aimbotTimer === 0) {
-                    clearInterval(timerInterval);
-                    aimbotActive = false;
-                    timerElement.textContent = "";
-                    activeCode = null;
-                }
-            }, 1000);
-        }
-
-        function activateGodMode() {
-            godModeActive = true;
-            timerElement.textContent = `Godmode: ${godModeTimer}s`;
-            timerInterval = setInterval(() => {
-                godModeTimer--;
-                timerElement.textContent = `Godmode: ${godModeTimer}s`;
-
-                if (godModeTimer === 0) {
-                    clearInterval(timerInterval);
-                    godModeActive = false;
-                    timerElement.textContent = "";
-                    activeCode = null;
-                }
-            }, 1000);
-        }
-
-        function
+</body>
+</html>
