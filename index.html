@@ -65,9 +65,26 @@
             color: #ECF0F1;
             margin-top: 15px;
         }
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
         .dice {
-            font-size: 3em;
-            margin: 10px;
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: black;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .dice img {
+            width: 100%;
         }
     </style>
 </head>
@@ -89,16 +106,17 @@
         <button class="btn" onclick="useSecretCode()">Code verwenden</button>
         <p id="secret-feedback"></p>
         <p id="next-roll" class="next-roll"></p>
-        <div id="dice" class="dice">
+
+        <div class="dice-container">
             <!-- Die Würfel werden hier angezeigt -->
-            Würfel 1: <span id="dice1">1</span>, Würfel 2: <span id="dice2">1</span>
+            <div id="dice1" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 1"></div>
+            <div id="dice2" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 2"></div>
         </div>
     </div>
 
     <script>
         let score = 0;
         let secretUsed = false;
-        let nextRoll = -1; // Nächster Wurf wird hier bestimmt
         let gameOver = false;
         let godMode = false; // Flag für Godmode
         let allowlist = false; // Flag für Allowlist
@@ -116,9 +134,9 @@
         }
 
         function updateDiceDisplay() {
-            // Zeige immer die aktuellen Werte der Würfel an
-            document.getElementById('dice1').textContent = dice1;
-            document.getElementById('dice2').textContent = dice2;
+            // Zeige immer die aktuellen Würfelbilder an
+            document.getElementById('dice1').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_${dice1}.svg/512px-Dice_${dice1}.svg.png" alt="Würfel 1">`;
+            document.getElementById('dice2').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_${dice2}.svg/512px-Dice_${dice2}.svg.png" alt="Würfel 2">`;
         }
 
         function checkGuess() {
@@ -199,11 +217,3 @@
             dice2 = 1;
             sum = 2;
             updateDiceDisplay();
-        }
-
-        // Nach Game Over alles zurücksetzen
-        setTimeout(resetGame, 5000); // Spiel wird nach 5 Sekunden zurückgesetzt
-    </script>
-
-</body>
-</html>
