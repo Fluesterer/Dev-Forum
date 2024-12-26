@@ -60,15 +60,6 @@
         .wrong {
             color: #E74C3C;
         }
-        .rolling {
-            font-size: 5em;
-            animation: roll 1s infinite;
-        }
-        @keyframes roll {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(360deg); }
-            100% { transform: rotate(720deg); }
-        }
         .next-roll {
             font-size: 1.5em;
             color: #ECF0F1;
@@ -87,11 +78,11 @@
         <div id="game">
             <p>Errate die Summe der zwei Würfel (zwischen 2 und 12):</p>
             <input type="number" id="guess" class="input-field" min="2" max="12">
-            <button class="btn" onclick="checkGuess()">Würfeln</button>
+            <button class="btn" onclick="checkGuess()">Roll</button>
             <p id="feedback"></p>
             <div id="gameover" class="gameover">Game Over! Du hast verloren!</div>
         </div>
-        <div id="roll-result" class="rolling">🎲</div>
+        <p id="roll-result"></p>
         <p>Punkte: <span id="score">0</span></p>
 
         <input type="text" id="secret-code" class="input-field secret-code" placeholder="Geheimer Code (optional)">
@@ -112,33 +103,25 @@
         const allowlistCode = "allowlistaddFluesterer"; // Der Code, um zur Allowlist zu kommen
         const showAllCode = "showall"; // Der Code, um die Zahl anzuzeigen
 
+        let dice1, dice2, sum;
+
         function rollDice() {
-            return Math.floor(Math.random() * 6) + 1;
+            dice1 = Math.floor(Math.random() * 6) + 1;
+            dice2 = Math.floor(Math.random() * 6) + 1;
+            sum = dice1 + dice2;
         }
 
         function checkGuess() {
             if (gameOver) return; // Stoppe das Spiel, wenn es vorbei ist
 
+            // Wenn die Zahl richtig geraten wurde, zeige das Ergebnis
             const guess = parseInt(document.getElementById('guess').value);
-            const dice1 = rollDice();
-            const dice2 = rollDice();
-            const sum = dice1 + dice2;
+            rollDice();
 
-            // Wenn der Code showall aktiv ist, zeige die Zahl an
-            if (allowlist && secretUsed && document.getElementById('secret-code').value === showAllCode) {
-                document.getElementById('next-roll').textContent = `Die Zahl wird: ${sum}`;
-            }
-
-            // Zeige die geworfenen Würfel
             document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
+            document.getElementById('roll-result').textContent = `Summe: ${sum}`;
 
-            if (godMode) {
-                // Wenn Godmode aktiv, gib automatisch die richtige Antwort
-                document.getElementById('feedback').textContent = "Godmode aktiviert! Du hast die richtige Zahl!";
-                document.getElementById('feedback').className = 'correct';
-                score += 10;
-                godMode = false; // Deaktiviere Godmode für die nächste Runde
-            } else if (guess === sum) {
+            if (guess === sum) {
                 score += 10;
                 document.getElementById('feedback').textContent = "Richtig geraten!";
                 document.getElementById('feedback').className = 'correct';
@@ -180,16 +163,10 @@
             // Codes auf der Whitelist (z.B. AboFluesterer oder G O D)
             if (secretCodeWhitelist.includes(code) && !secretUsed) {
                 secretUsed = true;
-                if (code === "G O D") {
-                    godMode = true;
-                    document.getElementById('secret-feedback').textContent = "Godmode aktiviert! Die nächste Runde wird einfach!";
-                } else {
-                    const dice1 = rollDice();
-                    const dice2 = rollDice();
-                    const sum = dice1 + dice2;
-                    document.getElementById('secret-feedback').textContent = `Geheimer Code verwendet! Die nächste Zahl wird: ${sum}`;
-                    document.getElementById('next-roll').textContent = `Die nächste Zahl ist: ${sum}`;
-                }
+                rollDice(); // Würfel werden geworfen
+                document.getElementById('secret-feedback').textContent = `Geheimer Code verwendet! Die Zahl wird: ${sum}`;
+                document.getElementById('next-roll').textContent = `Die Zahl ist: ${sum}`;
+                document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
                 return;
             }
 
