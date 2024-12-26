@@ -32,8 +32,8 @@
         const hand = {
             x: 100,
             y: canvas.height / 2,
-            width: 60,
-            height: 60,
+            width: 40, // Kleinere Breite
+            height: 40, // Kleinere Höhe
             velocity: 0,
             gravity: 0.6,
             jumpStrength: -10,
@@ -42,18 +42,18 @@
 
         // Chips
         const chips = {
-            x: canvas.width - 150,
+            x: canvas.width - 100, // Näher am Rand
             y: Math.random() * (canvas.height - 100),
-            width: 40,
-            height: 40,
+            width: 30, // Kleinere Größe
+            height: 30,
             color: '#FFD700'
         };
 
         // Obstacles (Tische)
         let obstacles = [];
         const obstacleFrequency = 2000; // in ms
-        const gapHeight = 150;
-        const obstacleWidth = 80;
+        const gapHeight = 120; // Kleinere Lücke
+        const obstacleWidth = 70; // Kleinere Hindernisbreite
 
         function createObstacle() {
             const topHeight = Math.random() * (canvas.height - gapHeight - 100) + 50;
@@ -121,7 +121,7 @@
                 }
 
                 // Respawn chips
-                chips.x = canvas.width - 150;
+                chips.x = canvas.width - 100;
                 chips.y = Math.random() * (canvas.height - 100);
             }
         }
@@ -191,7 +191,7 @@
             chips.x -= 5; // Move chips to the left
             if (chips.x + chips.width < 0) {
                 // Respawn chips if they move off-screen
-                chips.x = canvas.width - 150;
+                chips.x = canvas.width - 100;
                 chips.y = Math.random() * (canvas.height - 100);
             }
 
