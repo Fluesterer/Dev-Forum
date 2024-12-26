@@ -114,7 +114,11 @@
             </div>
 
             <p id="feedback"></p>
-            <div id="gameover" class="gameover">Game Over! Du hast verloren!</div>
+            <div id="gameover" class="gameover">
+                Game Over! Du hast verloren! <br> <span id="score-result"></span> <br> <span id="rating"></span>
+                <br>
+                <button class="btn" onclick="restartGame()">Try Again</button>
+            </div>
         </div>
         <p id="roll-result"></p>
         <p>Punkte: <span id="score">0</span></p>
@@ -131,6 +135,7 @@
         let secretUsed = false;
         let gameOver = false;
         let godMode = false; // Flag für Godmode
+        let round = 0; // Zähler für die Runden
         let allowlist = false; // Flag für Allowlist
         const secretCodeWhitelist = ["AboFluesterer", "G O D"]; // Whitelist für Codes
         const allowlistCode = "allowlistaddFluesterer"; // Der Code, um zur Allowlist zu kommen
@@ -175,6 +180,7 @@
 
             if (guess === sum) {
                 score += 10;
+                round++; // Erhöhe die Runde
                 document.getElementById('feedback').textContent = "Richtig geraten!";
                 document.getElementById('feedback').className = 'correct';
             } else {
@@ -184,10 +190,43 @@
                     gameOver = true;
                     document.getElementById('gameover').style.display = 'block';
                     document.getElementById('game').style.display = 'none';
+                    document.getElementById('score-result').textContent = `Punkte: ${score}`;
+                    displayRating();
                 }, 2000);
             }
 
             document.getElementById('score').textContent = score;
+        }
+
+        function displayRating() {
+            let rating = "F-";
+            if (round >= 5) {
+                rating = "A+";
+            } else if (round >= 4) {
+                rating = "A";
+            } else if (round >= 3) {
+                rating = "B";
+            } else if (round >= 2) {
+                rating = "C";
+            } else if (round >= 1) {
+                rating = "D";
+            }
+            document.getElementById('rating').textContent = `Bewertung: ${rating}`;
+        }
+
+        function restartGame() {
+            score = 0;
+            round = 0;
+            gameOver = false;
+            secretUsed = false;
+            document.getElementById('gameover').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('roll-result').textContent = '';
+            document.getElementById('secret-feedback').textContent = '';
+            document.getElementById('next-roll').textContent = '';
+            document.getElementById('secret-code').value = '';
         }
 
         function useSecretCode() {
