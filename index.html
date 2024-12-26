@@ -89,7 +89,10 @@
         <button class="btn" onclick="useSecretCode()">Code verwenden</button>
         <p id="secret-feedback"></p>
         <p id="next-roll" class="next-roll"></p>
-        <div id="dice" class="dice"></div>
+        <div id="dice" class="dice">
+            <!-- Die Würfel werden hier angezeigt -->
+            Würfel 1: <span id="dice1">1</span>, Würfel 2: <span id="dice2">1</span>
+        </div>
     </div>
 
     <script>
@@ -114,7 +117,8 @@
 
         function updateDiceDisplay() {
             // Zeige immer die aktuellen Werte der Würfel an
-            document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
+            document.getElementById('dice1').textContent = dice1;
+            document.getElementById('dice2').textContent = dice2;
         }
 
         function checkGuess() {
