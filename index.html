@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord-ähnliches Forum</title>
     <style>
+        /* Basis-Styles */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -12,20 +13,27 @@
             background-color: #36393f;
             color: #dcddde;
         }
+
         .container {
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
-        .sidebar {
-            display: none; /* Hidden for simplicity */
+
+        .header {
+            background-color: #202225;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+            color: #ffffff;
         }
+
         .main {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
+
         .messages {
             flex-grow: 1;
             padding: 20px;
@@ -34,15 +42,19 @@
             flex-direction: column;
             gap: 15px;
         }
+
         .message {
             background-color: #40444b;
             padding: 15px;
             border-radius: 10px;
+            position: relative;
         }
+
         .message .user {
             font-weight: bold;
             color: #7289da;
         }
+
         .message .op-badge {
             font-size: 12px;
             color: #f04747;
@@ -51,15 +63,48 @@
             margin-left: 5px;
             border-radius: 3px;
         }
+
         .message .text {
             margin-top: 5px;
         }
+
         .message .reply {
             margin-left: 20px;
             margin-top: 10px;
             border-left: 2px solid #7289da;
             padding-left: 10px;
         }
+
+        .reply-button {
+            background-color: #7289da;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            color: white;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .reply-button:hover {
+            background-color: #677bc4;
+        }
+
+        .delete-button {
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+
+        .delete-button:hover {
+            background-color: darkred;
+        }
+
         .input-bar {
             display: flex;
             flex-direction: column;
@@ -68,6 +113,7 @@
             background-color: #2f3136;
             border-top: 1px solid #202225;
         }
+
         .input-bar input, .input-bar textarea {
             padding: 10px;
             border: none;
@@ -75,6 +121,7 @@
             background-color: #40444b;
             color: #ffffff;
         }
+
         .input-bar button {
             padding: 10px;
             background-color: #7289da;
@@ -83,25 +130,16 @@
             color: #ffffff;
             cursor: pointer;
         }
+
         .input-bar button:hover {
             background-color: #677bc4;
         }
-        .delete-button {
-            background-color: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            margin-top: 10px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .delete-button:hover {
-            background-color: darkred;
-        }
+
         @media (max-width: 768px) {
             .messages {
                 padding: 10px;
             }
+
             .input-bar {
                 padding: 5px;
             }
@@ -110,8 +148,13 @@
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Forum</h1>
+        </div>
+
+        <!-- Main Content -->
         <div class="main">
-            <!-- Nachrichtenanzeige -->
             <div class="messages" id="messages"></div>
 
             <!-- Eingabefelder -->
@@ -126,7 +169,7 @@
 
     <script>
         const whitelist = ['nico.friesen1bausa@gmail.com']; // Whitelisted Emails
-        const messages = []; // Array to store messages
+        const messages = JSON.parse(localStorage.getItem('forumMessages')) || []; // Load messages from localStorage
 
         function sendMessage() {
             const user = document.getElementById('user').value.trim();
@@ -141,6 +184,7 @@
             const isOp = whitelist.includes(email);
             const message = { user, email, text, isOp, replies: [] };
             messages.push(message);
+            saveMessages();
 
             // Clear input fields
             document.getElementById('message').value = '';
@@ -161,12 +205,18 @@
 
             const isOp = whitelist.includes(email);
             messages[index].replies.push({ user, email, text: replyText, isOp });
+            saveMessages();
             renderMessages();
         }
 
         function deleteMessage(index) {
             messages.splice(index, 1);
+            saveMessages();
             renderMessages();
+        }
+
+        function saveMessages() {
+            localStorage.setItem('forumMessages', JSON.stringify(messages));
         }
 
         function renderMessages() {
@@ -205,6 +255,9 @@
             // Scroll to the bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
+
+        // Initial render
+        renderMessages();
     </script>
 </body>
 </html>
