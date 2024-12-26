@@ -103,12 +103,18 @@
         const allowlistCode = "allowlistaddFluesterer"; // Der Code, um zur Allowlist zu kommen
         const showAllCode = "showall"; // Der Code, um die Zahl anzuzeigen
 
-        let dice1, dice2, sum;
+        let dice1 = 1, dice2 = 1, sum = 2; // Startwerte für Würfel, damit sie immer angezeigt werden
 
         function rollDice() {
             dice1 = Math.floor(Math.random() * 6) + 1;
             dice2 = Math.floor(Math.random() * 6) + 1;
             sum = dice1 + dice2;
+            updateDiceDisplay();
+        }
+
+        function updateDiceDisplay() {
+            // Zeige immer die aktuellen Werte der Würfel an
+            document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
         }
 
         function checkGuess() {
@@ -116,9 +122,8 @@
 
             // Wenn die Zahl richtig geraten wurde, zeige das Ergebnis
             const guess = parseInt(document.getElementById('guess').value);
-            rollDice();
+            rollDice(); // Würfeln bei jedem Klick auf "Roll"
 
-            document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
             document.getElementById('roll-result').textContent = `Summe: ${sum}`;
 
             if (guess === sum) {
@@ -166,7 +171,6 @@
                 rollDice(); // Würfel werden geworfen
                 document.getElementById('secret-feedback').textContent = `Geheimer Code verwendet! Die Zahl wird: ${sum}`;
                 document.getElementById('next-roll').textContent = `Die Zahl ist: ${sum}`;
-                document.getElementById('dice').textContent = `Würfel 1: ${dice1}, Würfel 2: ${dice2}`;
                 return;
             }
 
@@ -185,6 +189,12 @@
             document.getElementById('feedback').textContent = "";
             document.getElementById('secret-feedback').textContent = "";
             document.getElementById('score').textContent = score;
+
+            // Setze die Würfel zurück
+            dice1 = 1;
+            dice2 = 1;
+            sum = 2;
+            updateDiceDisplay();
         }
 
         // Nach Game Over alles zurücksetzen
