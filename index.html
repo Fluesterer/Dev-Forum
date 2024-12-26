@@ -10,258 +10,188 @@
             background-color: #2C3E50;
             color: #ECF0F1;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            flex-direction: column;
         }
         h1 {
-            font-size: 3em;
+            font-size: 2.5em;
             margin-bottom: 20px;
         }
         .container {
             text-align: center;
         }
-        .input-field {
-            margin: 10px 0;
+        .input-field, .btn {
             padding: 10px;
-            font-size: 1.2em;
+            font-size: 1em;
             border: none;
             border-radius: 5px;
-            background-color: #34495E;
-            color: #ECF0F1;
+            margin: 5px;
         }
         .btn {
-            padding: 10px 20px;
-            font-size: 1.5em;
             background-color: #27AE60;
-            border: none;
-            border-radius: 5px;
             color: white;
             cursor: pointer;
         }
         .btn:hover {
             background-color: #2ECC71;
         }
-        .secret-code {
-            font-size: 1.2em;
-            background-color: #7F8C8D;
-            margin-bottom: 10px;
-        }
-        .gameover {
-            display: none;
-            font-size: 2em;
-            color: #E74C3C;
-        }
-        .correct {
-            color: #2ECC71;
-        }
-        .wrong {
-            color: #E74C3C;
-        }
-        .next-roll {
-            font-size: 1.5em;
-            color: #ECF0F1;
-            margin-top: 15px;
-        }
         .dice-container {
             display: flex;
-            justify-content: center;
-            margin: 20px;
-            gap: 10px;
+            gap: 20px;
+            margin: 20px 0;
         }
         .dice {
             width: 100px;
             height: 100px;
-            background-color: #fff;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            color: black;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-        .input-container {
-            margin-top: 20px;
+        .gameover {
+            display: none;
         }
-        .input-container input {
-            width: 120px;
-            margin-right: 10px;
+        .gameover.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-
     <h1>Zahlenraten Spiel</h1>
     <div class="container">
         <div id="game">
-            <!-- Die Würfel oben -->
             <div class="dice-container">
-                <div id="dice1" class="dice"><img src="https://i.imgur.com/1oMBEal.jpeg" alt="Würfel 1" width="100" height="100"></div>
-                <div id="dice2" class="dice"><img src="https://i.imgur.com/xsjQP6c.jpeg" alt="Würfel 2" width="100" height="100"></div>
+                <img id="dice1" class="dice" src="https://i.imgur.com/1oMBEal.jpeg" alt="Würfel 1">
+                <img id="dice2" class="dice" src="https://i.imgur.com/xsjQP6c.jpeg" alt="Würfel 2">
             </div>
-
-            <!-- Der Roll-Button rechts neben den Würfeln -->
-            <div class="input-container">
+            <div>
+                <input type="number" id="guess" class="input-field" placeholder="Errate die Zahl" min="2" max="12">
                 <button class="btn" onclick="checkGuess()">Roll</button>
             </div>
-
-            <!-- Eingabefeld für die Zahl -->
-            <div class="input-container">
-                <input type="number" id="guess" class="input-field" min="2" max="12" placeholder="Errate die Zahl">
-            </div>
-
             <p id="feedback"></p>
-            <div id="gameover" class="gameover">
-                Game Over! Du hast verloren! <br> <span id="score-result"></span> <br> <span id="rating"></span>
-                <br>
-                <button class="btn" onclick="restartGame()">Try Again</button>
-            </div>
+            <p>Punkte: <span id="score">0</span></p>
         </div>
-        <p id="roll-result"></p>
-        <p>Punkte: <span id="score">0</span></p>
-
-        <input type="text" id="secret-code" class="input-field secret-code" placeholder="Geheimer Code (optional)">
-        <button class="btn" onclick="useSecretCode()">Code verwenden</button>
-        <p id="secret-feedback"></p>
-        <p id="next-roll" class="next-roll"></p>
-
+        <div id="code-input">
+            <input type="text" id="secret-code" class="input-field" placeholder="Geheimer Code">
+            <button class="btn" onclick="useSecretCode()">Code verwenden</button>
+            <p id="code-feedback"></p>
+        </div>
+        <div id="gameover" class="gameover">
+            <h2>Game Over!</h2>
+            <p id="final-score"></p>
+            <p id="rating"></p>
+            <button class="btn" onclick="restartGame()">Try Again</button>
+        </div>
     </div>
 
     <script>
         let score = 0;
-        let secretUsed = false;
+        let round = 0;
         let gameOver = false;
-        let godMode = false; // Flag für Godmode
-        let round = 0; // Zähler für die Runden
-        let allowlist = false; // Flag für Allowlist
-        const secretCodeWhitelist = ["AboFluesterer", "G O D"]; // Whitelist für Codes
-        const allowlistCode = "allowlistaddFluesterer"; // Der Code, um zur Allowlist zu kommen
-        const showAllCode = "showall"; // Der Code, um die Zahl anzuzeigen
+        let godMode = false;
+        let allowlist = false;
+        let showAlways = false;
+        let secretUsed = {
+            "AboFluesterer": false,
+            "G O D": false,
+            "showall": false
+        };
 
-        let dice1 = 1, dice2 = 1, sum = 2; // Startwerte für Würfel, damit sie immer angezeigt werden
+        const diceImages = [
+            "1oMBEal.jpeg", // Bild für 1
+            "xsjQP6c.jpeg", // Bild für 2
+            "nTrQHd2.jpeg", // Bild für 3
+            "Yfn2T1x.jpeg", // Bild für 4
+            "nsqaual.jpeg", // Bild für 5
+            "Yfn2T1x.jpeg"  // Bild für 6 (kann angepasst werden)
+        ];
 
         function rollDice() {
-            dice1 = Math.floor(Math.random() * 6) + 1;
-            dice2 = Math.floor(Math.random() * 6) + 1;
-            sum = dice1 + dice2;
-            updateDiceDisplay();
-        }
-
-        function updateDiceDisplay() {
-            // Zeige immer die aktuellen Würfelbilder an
-            document.getElementById('dice1').innerHTML = `<img src="https://i.imgur.com/${getDiceImage(dice1)}" alt="Würfel 1" width="100" height="100">`;
-            document.getElementById('dice2').innerHTML = `<img src="https://i.imgur.com/${getDiceImage(dice2)}" alt="Würfel 2" width="100" height="100">`;
-        }
-
-        function getDiceImage(diceNumber) {
-            // Gib die Bilddateinamen basierend auf der geworfenen Zahl zurück
-            const diceImages = [
-                '1oMBEal.jpeg', // Bild für 1
-                'xsjQP6c.jpeg', // Bild für 2
-                'nTrQHd2.jpeg', // Bild für 3
-                'Yfn2T1x.jpeg', // Bild für 4
-                'nsqaual.jpeg', // Bild für 5
-                'Yfn2T1x.jpeg'  // Bild für 6 (kann angepasst werden)
-            ];
-            return diceImages[diceNumber - 1];
+            const dice1 = Math.floor(Math.random() * 6) + 1;
+            const dice2 = Math.floor(Math.random() * 6) + 1;
+            const sum = dice1 + dice2;
+            document.getElementById("dice1").src = `https://i.imgur.com/${diceImages[dice1 - 1]}`;
+            document.getElementById("dice2").src = `https://i.imgur.com/${diceImages[dice2 - 1]}`;
+            return sum;
         }
 
         function checkGuess() {
-            if (gameOver) return; // Stoppe das Spiel, wenn es vorbei ist
+            if (gameOver) return;
+            const guess = parseInt(document.getElementById("guess").value);
+            const sum = rollDice();
 
-            // Wenn die Zahl richtig geraten wurde, zeige das Ergebnis
-            const guess = parseInt(document.getElementById('guess').value);
-            rollDice(); // Würfeln bei jedem Klick auf "Roll"
-
-            document.getElementById('roll-result').textContent = `Summe: ${sum}`;
-
-            if (guess === sum) {
+            if (guess === sum || godMode || showAlways) {
                 score += 10;
-                round++; // Erhöhe die Runde
-                document.getElementById('feedback').textContent = "Richtig geraten!";
-                document.getElementById('feedback').className = 'correct';
+                round++;
+                document.getElementById("feedback").textContent = "Richtig geraten!";
             } else {
-                document.getElementById('feedback').textContent = "Falsch geraten! Versuche es nochmal.";
-                document.getElementById('feedback').className = 'wrong';
-                setTimeout(() => {
-                    gameOver = true;
-                    document.getElementById('gameover').style.display = 'block';
-                    document.getElementById('game').style.display = 'none';
-                    document.getElementById('score-result').textContent = `Punkte: ${score}`;
-                    displayRating();
-                }, 2000);
+                document.getElementById("feedback").textContent = "Falsch geraten! Game Over!";
+                endGame();
+                return;
             }
-
-            document.getElementById('score').textContent = score;
+            document.getElementById("score").textContent = score;
         }
 
-        function displayRating() {
-            let rating = "F-";
-            if (round >= 5) {
-                rating = "A+";
-            } else if (round >= 4) {
-                rating = "A";
-            } else if (round >= 3) {
-                rating = "B";
-            } else if (round >= 2) {
-                rating = "C";
-            } else if (round >= 1) {
-                rating = "D";
-            }
-            document.getElementById('rating').textContent = `Bewertung: ${rating}`;
+        function endGame() {
+            gameOver = true;
+            document.getElementById("game").style.display = "none";
+            document.getElementById("code-input").style.display = "none";
+            document.getElementById("gameover").classList.add("active");
+            document.getElementById("final-score").textContent = `Punkte: ${score}`;
+            document.getElementById("rating").textContent = `Bewertung: ${getRating()}`;
+        }
+
+        function getRating() {
+            if (round >= 5) return "A+";
+            if (round >= 4) return "A";
+            if (round >= 3) return "B";
+            if (round >= 2) return "C";
+            if (round >= 1) return "D";
+            return "F-";
         }
 
         function restartGame() {
             score = 0;
             round = 0;
             gameOver = false;
-            secretUsed = false;
-            document.getElementById('gameover').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
-            document.getElementById('score').textContent = score;
-            document.getElementById('feedback').textContent = '';
-            document.getElementById('roll-result').textContent = '';
-            document.getElementById('secret-feedback').textContent = '';
-            document.getElementById('next-roll').textContent = '';
-            document.getElementById('secret-code').value = '';
+            godMode = false;
+            showAlways = false;
+            document.getElementById("game").style.display = "block";
+            document.getElementById("code-input").style.display = "block";
+            document.getElementById("gameover").classList.remove("active");
+            document.getElementById("feedback").textContent = "";
+            document.getElementById("score").textContent = score;
         }
 
         function useSecretCode() {
-            const code = document.getElementById('secret-code').value;
+            const code = document.getElementById("secret-code").value.trim();
 
-            // Wenn der Code bereits verwendet wurde
-            if (secretUsed && (code === "AboFluesterer" || code === "G O D" || code === showAllCode)) {
-                document.getElementById('secret-feedback').textContent = "Code bereits eingelöst!";
-                return;
-            }
-
-            // Code "allowlistaddFluesterer" um die Allowlist zu aktivieren
-            if (code === allowlistCode) {
+            if (code === "allowlistaddFluesterer") {
                 allowlist = true;
-                document.getElementById('secret-feedback').textContent = "Du bist jetzt auf der Allowlist und hast Zugriff auf alle Codes!";
+                document.getElementById("code-feedback").textContent = "Du bist jetzt auf der Allowlist!";
                 return;
             }
 
-            // Code "showall" funktioniert nur, wenn der Benutzer auf der Allowlist ist
-            if (code === showAllCode && !allowlist) {
-                document.getElementById('secret-feedback').textContent = "Dieser Code existiert nicht!";
+            if (code === "showall" && allowlist) {
+                showAlways = true;
+                document.getElementById("code-feedback").textContent = "Geheimer Modus aktiviert: Zahlen werden immer angezeigt.";
                 return;
             }
 
-            // Codes auf der Whitelist (z.B. AboFluesterer oder G O D)
-            if (secretCodeWhitelist.includes(code) && !secretUsed) {
-                secretUsed = true;
-                rollDice(); // Würfel werden geworfen
-                document.getElementById('secret-feedback').textContent = `Geheimer Code verwendet! Die Zahl wird: ${sum}`;
-                document.getElementById('next-roll').textContent = `Die Zahl ist: ${sum}`;
+            if (code === "AboFluesterer" && !secretUsed["AboFluesterer"]) {
+                secretUsed["AboFluesterer"] = true;
+                document.getElementById("code-feedback").textContent = "Die nächste Zahl ist garantiert richtig!";
+                godMode = true;
                 return;
             }
 
-            // Wenn der Code nicht existiert
-            document.getElementById('secret-feedback').textContent = "Dieser Code existiert nicht!";
+            if (code === "G O D" && !secretUsed["G O D"]) {
+                secretUsed["G O D"] = true;
+                document.getElementById("code-feedback").textContent = "Godmode aktiviert!";
+                godMode = true;
+                return;
+            }
+
+            document.getElementById("code-feedback").textContent = "Dieser Code existiert nicht oder wurde bereits verwendet!";
         }
     </script>
 </body>
