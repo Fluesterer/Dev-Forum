@@ -83,10 +83,6 @@
             color: black;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-        .dice img {
-            width: 80%;
-            height: 80%;
-        }
         .input-container {
             margin-top: 20px;
         }
@@ -103,8 +99,8 @@
         <div id="game">
             <!-- Die Würfel oben -->
             <div class="dice-container">
-                <div id="dice1" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 1"></div>
-                <div id="dice2" class="dice"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_1.svg/512px-Dice_1.svg.png" alt="Würfel 2"></div>
+                <div id="dice1" class="dice"><img src="https://i.imgur.com/1oMBEal.jpeg" alt="Würfel 1"></div>
+                <div id="dice2" class="dice"><img src="https://i.imgur.com/xsjQP6c.jpeg" alt="Würfel 2"></div>
             </div>
 
             <!-- Der Roll-Button rechts neben den Würfeln -->
@@ -151,8 +147,21 @@
 
         function updateDiceDisplay() {
             // Zeige immer die aktuellen Würfelbilder an
-            document.getElementById('dice1').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_${dice1}.svg/512px-Dice_${dice1}.svg.png" alt="Würfel 1">`;
-            document.getElementById('dice2').innerHTML = `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dice_${dice2}.svg/512px-Dice_${dice2}.svg.png" alt="Würfel 2">`;
+            document.getElementById('dice1').innerHTML = `<img src="https://i.imgur.com/${getDiceImage(dice1)}" alt="Würfel 1">`;
+            document.getElementById('dice2').innerHTML = `<img src="https://i.imgur.com/${getDiceImage(dice2)}" alt="Würfel 2">`;
+        }
+
+        function getDiceImage(diceNumber) {
+            // Gib die Bilddateinamen basierend auf der geworfenen Zahl zurück
+            const diceImages = [
+                '1oMBEal.jpeg', // Bild für 1
+                'xsjQP6c.jpeg', // Bild für 2
+                'nTrQHd2.jpeg', // Bild für 3
+                'Yfn2T1x.jpeg', // Bild für 4
+                'nsqaual.jpeg', // Bild für 5
+                'Yfn2T1x.jpeg'  // Bild für 6 (kann angepasst werden)
+            ];
+            return diceImages[diceNumber - 1];
         }
 
         function checkGuess() {
