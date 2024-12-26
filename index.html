@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #f5f5f5;
+            background-color: #87CEFA; /* Himmelblauer Hintergrund */
         }
         canvas {
             display: block;
@@ -26,28 +27,30 @@
 
         let gameOver = false;
         let score = 0;
+        let bestScore = localStorage.getItem('bestScore') || 0;
 
         // Player (Hand)
         const hand = {
             x: 100,
             y: canvas.height / 2,
-            width: 50,
-            height: 50,
-            speed: 7
+            width: 60,
+            height: 60,
+            speed: 7,
+            color: 'brown'
         };
 
         // Target (Chips)
         const chips = {
-            x: canvas.width - 100,
-            y: canvas.height / 2,
-            width: 40,
-            height: 40,
-            speed: 3
+            x: Math.random() * (canvas.width - 100) + 100,
+            y: Math.random() * (canvas.height - 100),
+            width: 50,
+            height: 50,
+            color: 'gold'
         };
 
         // Obstacles (Tables)
         const obstacles = [];
-        const obstacleFrequency = 1500; // in ms
+        const obstacleFrequency = 2000; // in ms
         const obstacleWidth = 50;
         const obstacleHeight = 200;
 
@@ -57,7 +60,8 @@
                 x: canvas.width,
                 y: obstacleY,
                 width: obstacleWidth,
-                height: obstacleHeight
+                height: obstacleHeight,
+                color: 'darkgrey'
             });
         }
 
@@ -68,13 +72,6 @@
             // Prevent moving out of bounds
             if (hand.y < 0) hand.y = 0;
             if (hand.y + hand.height > canvas.height) hand.y = canvas.height - hand.height;
-        }
-
-        function moveChips() {
-            chips.y += chips.speed;
-            if (chips.y <= 0 || chips.y + chips.height >= canvas.height) {
-                chips.speed *= -1;
-            }
         }
 
         function moveObstacles() {
@@ -92,7 +89,15 @@
                 hand.y < chips.y + chips.height &&
                 hand.y + hand.height > chips.y
             ) {
-                gameOver = true;
+                score++;
+                if (score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('bestScore', bestScore);
+                }
+
+                // Respawn chips at a new random location
+                chips.x = Math.random() * (canvas.width - 100) + 100;
+                chips.y = Math.random() * (canvas.height - 100);
             }
 
             // Hand and Obstacles
@@ -109,18 +114,20 @@
         }
 
         function drawHand() {
-            ctx.fillStyle = 'brown';
+            ctx.fillStyle = hand.color;
             ctx.fillRect(hand.x, hand.y, hand.width, hand.height);
         }
 
         function drawChips() {
-            ctx.fillStyle = 'orange';
-            ctx.fillRect(chips.x, chips.y, chips.width, chips.height);
+            ctx.fillStyle = chips.color;
+            ctx.beginPath();
+            ctx.arc(chips.x + chips.width / 2, chips.y + chips.height / 2, chips.width / 2, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function drawObstacles() {
-            ctx.fillStyle = 'grey';
             obstacles.forEach(obstacle => {
+                ctx.fillStyle = obstacle.color;
                 ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
             });
         }
@@ -129,19 +136,25 @@
             ctx.fillStyle = 'black';
             ctx.font = '20px Arial';
             ctx.fillText(`Score: ${score}`, 20, 30);
+            ctx.fillText(`Best Score: ${bestScore}`, 20, 60);
+        }
+
+        function drawGameOver() {
+            ctx.fillStyle = 'red';
+            ctx.font = '40px Arial';
+            ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2 - 20);
+            ctx.font = '20px Arial';
+            ctx.fillText('Tap to Restart', canvas.width / 2 - 70, canvas.height / 2 + 20);
         }
 
         function update() {
             if (gameOver) {
-                ctx.fillStyle = 'red';
-                ctx.font = '40px Arial';
-                ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2);
+                drawGameOver();
                 return;
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            moveChips();
             moveObstacles();
             checkCollisions();
 
@@ -150,7 +163,6 @@
             drawObstacles();
             drawScore();
 
-            score++;
             requestAnimationFrame(update);
         }
 
@@ -159,6 +171,14 @@
 
         canvas.addEventListener('touchstart', (e) => {
             lastTouchY = e.touches[0].clientY;
+
+            // Restart game if game over
+            if (gameOver) {
+                gameOver = false;
+                score = 0;
+                obstacles.length = 0;
+                update();
+            }
         });
 
         canvas.addEventListener('touchmove', (e) => {
