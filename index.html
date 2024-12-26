@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand vs. Chips</title>
+    <title>Flappy Hand vs. Chips</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEFA; /* Himmelblauer Hintergrund */
+            background-color: #87CEEB; /* Himmelblauer Hintergrund */
         }
         canvas {
             display: block;
@@ -29,60 +28,87 @@
         let score = 0;
         let bestScore = localStorage.getItem('bestScore') || 0;
 
-        // Player (Hand)
+        // Hand (Player)
         const hand = {
             x: 100,
             y: canvas.height / 2,
-            width: 60,
-            height: 60,
-            speed: 7,
+            width: 50,
+            height: 50,
+            velocity: 0,
+            gravity: 0.5,
+            jumpStrength: -10,
             color: 'brown'
         };
 
-        // Target (Chips)
+        // Chips
         const chips = {
-            x: Math.random() * (canvas.width - 100) + 100,
+            x: canvas.width - 150,
             y: Math.random() * (canvas.height - 100),
-            width: 50,
-            height: 50,
+            width: 40,
+            height: 40,
             color: 'gold'
         };
 
-        // Obstacles (Tables)
+        // Obstacles (Tische)
         const obstacles = [];
         const obstacleFrequency = 2000; // in ms
-        const obstacleWidth = 50;
-        const obstacleHeight = 200;
+        const gapHeight = 150;
+        const obstacleWidth = 80;
 
         function createObstacle() {
-            const obstacleY = Math.random() * (canvas.height - obstacleHeight);
+            const topHeight = Math.random() * (canvas.height - gapHeight - 100) + 50;
             obstacles.push({
                 x: canvas.width,
-                y: obstacleY,
+                y: 0,
                 width: obstacleWidth,
-                height: obstacleHeight,
-                color: 'darkgrey'
+                height: topHeight,
+                color: 'darkgrey',
+                isTop: true
+            });
+            obstacles.push({
+                x: canvas.width,
+                y: topHeight + gapHeight,
+                width: obstacleWidth,
+                height: canvas.height - topHeight - gapHeight,
+                color: 'darkgrey',
+                isTop: false
             });
         }
 
-        // Game mechanics
-        function moveHand(deltaY) {
-            hand.y += deltaY;
+        function moveHand() {
+            hand.velocity += hand.gravity;
+            hand.y += hand.velocity;
 
-            // Prevent moving out of bounds
+            // Prevent hand from leaving the screen
             if (hand.y < 0) hand.y = 0;
-            if (hand.y + hand.height > canvas.height) hand.y = canvas.height - hand.height;
+            if (hand.y + hand.height > canvas.height) {
+                gameOver = true;
+            }
         }
 
         function moveObstacles() {
             obstacles.forEach(obstacle => {
                 obstacle.x -= 5;
             });
-            obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+            // Remove obstacles that have moved off the screen
+            obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
         }
 
         function checkCollisions() {
-            // Hand and Chips
+            // Check collision with obstacles
+            obstacles.forEach(obstacle => {
+                if (
+                    hand.x < obstacle.x + obstacle.width &&
+                    hand.x + hand.width > obstacle.x &&
+                    hand.y < obstacle.y + obstacle.height &&
+                    hand.y + hand.height > obstacle.y
+                ) {
+                    gameOver = true;
+                }
+            });
+
+            // Check if hand collects chips
             if (
                 hand.x < chips.x + chips.width &&
                 hand.x + hand.width > chips.x &&
@@ -95,22 +121,10 @@
                     localStorage.setItem('bestScore', bestScore);
                 }
 
-                // Respawn chips at a new random location
-                chips.x = Math.random() * (canvas.width - 100) + 100;
+                // Respawn chips
+                chips.x = canvas.width - 150;
                 chips.y = Math.random() * (canvas.height - 100);
             }
-
-            // Hand and Obstacles
-            obstacles.forEach(obstacle => {
-                if (
-                    hand.x < obstacle.x + obstacle.width &&
-                    hand.x + hand.width > obstacle.x &&
-                    hand.y < obstacle.y + obstacle.height &&
-                    hand.y + hand.height > obstacle.y
-                ) {
-                    gameOver = true;
-                }
-            });
         }
 
         function drawHand() {
@@ -155,6 +169,7 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            moveHand();
             moveObstacles();
             checkCollisions();
 
@@ -163,35 +178,30 @@
             drawObstacles();
             drawScore();
 
+            chips.x -= 5; // Move chips to the left
+            if (chips.x + chips.width < 0) {
+                // Respawn chips if they move off-screen
+                chips.x = canvas.width - 150;
+                chips.y = Math.random() * (canvas.height - 100);
+            }
+
             requestAnimationFrame(update);
         }
 
-        // Touch controls
-        let lastTouchY = null;
-
-        canvas.addEventListener('touchstart', (e) => {
-            lastTouchY = e.touches[0].clientY;
-
-            // Restart game if game over
+        // Touch control
+        canvas.addEventListener('touchstart', () => {
             if (gameOver) {
+                // Restart the game
                 gameOver = false;
                 score = 0;
+                hand.y = canvas.height / 2;
+                hand.velocity = 0;
                 obstacles.length = 0;
                 update();
+            } else {
+                // Jump
+                hand.velocity = hand.jumpStrength;
             }
-        });
-
-        canvas.addEventListener('touchmove', (e) => {
-            if (lastTouchY) {
-                const currentTouchY = e.touches[0].clientY;
-                const deltaY = currentTouchY - lastTouchY;
-                moveHand(deltaY);
-                lastTouchY = currentTouchY;
-            }
-        });
-
-        canvas.addEventListener('touchend', () => {
-            lastTouchY = null;
         });
 
         // Start game
