@@ -3,33 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Einfaches Forum</title>
+    <title>Cooles Forum</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, black, purple, green, yellow);
+            color: white;
+            overflow-x: hidden;
         }
         .forum-container {
             max-width: 800px;
             margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 8px #ff5722;
         }
         .post {
-            border: 1px solid #ddd;
-            padding: 10px;
+            border: 2px solid #673ab7;
+            padding: 15px;
             margin: 10px 0;
-            border-radius: 5px;
-            background-color: #fff;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 15px rgba(103, 58, 183, 0.5);
         }
-        .post h3 {
+        .post h3, .post p {
             margin: 0;
         }
-        .post p {
-            margin: 5px 0;
+        .post .op-badge {
+            color: yellow;
+            font-weight: bold;
+            margin-left: 10px;
+            text-shadow: 0 0 5px #ffeb3b;
         }
         .reply {
             margin-left: 20px;
-            border-left: 2px solid #ccc;
+            border-left: 2px solid #4caf50;
             padding-left: 10px;
         }
         .form-group {
@@ -41,25 +57,43 @@
             margin: 5px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
         }
         .form-group button {
             padding: 10px 20px;
-            background-color: #007BFF;
+            background: linear-gradient(45deg, purple, green);
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
         .form-group button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(45deg, green, yellow);
+        }
+        .delete-button {
+            padding: 5px 10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .delete-button:hover {
+            background: darkred;
         }
     </style>
 </head>
 <body>
     <div class="forum-container">
-        <h1>Forum</h1>
+        <h1>Cooles Forum</h1>
         <div id="posts"></div>
         <h2>Neuen Beitrag erstellen</h2>
+        <div class="form-group">
+            <input type="email" id="email" placeholder="Deine E-Mail">
+        </div>
         <div class="form-group">
             <input type="text" id="name" placeholder="Dein Name">
         </div>
@@ -73,33 +107,45 @@
 
     <script>
         const posts = [];
+        const whitelist = ['nico.friesen1bausa@gmail.com', 'op@example.com', 'admin@example.com'];
 
         function addPost() {
+            const email = document.getElementById('email').value.trim();
             const name = document.getElementById('name').value.trim();
             const message = document.getElementById('message').value.trim();
 
-            if (name === '' || message === '') {
+            if (!email || !name || !message) {
                 alert('Bitte fülle alle Felder aus.');
                 return;
             }
 
-            const post = { name, message, replies: [] };
+            const isOp = whitelist.includes(email);
+            const post = { email, name, message, isOp, replies: [] };
             posts.push(post);
+
+            document.getElementById('email').value = '';
             document.getElementById('name').value = '';
             document.getElementById('message').value = '';
             renderPosts();
         }
 
         function addReply(index) {
-            const replyName = document.getElementById(`reply-name-${index}`).value.trim();
-            const replyMessage = document.getElementById(`reply-message-${index}`).value.trim();
+            const email = document.getElementById(`reply-email-${index}`).value.trim();
+            const name = document.getElementById(`reply-name-${index}`).value.trim();
+            const message = document.getElementById(`reply-message-${index}`).value.trim();
 
-            if (replyName === '' || replyMessage === '') {
+            if (!email || !name || !message) {
                 alert('Bitte fülle alle Felder aus.');
                 return;
             }
 
-            posts[index].replies.push({ name: replyName, message: replyMessage });
+            const isOp = whitelist.includes(email);
+            posts[index].replies.push({ email, name, message, isOp });
+            renderPosts();
+        }
+
+        function deletePost(index) {
+            posts.splice(index, 1);
             renderPosts();
         }
 
@@ -112,16 +158,20 @@
                 postElement.className = 'post';
 
                 postElement.innerHTML = `
-                    <h3>${post.name}</h3>
+                    <h3>${post.name} ${post.isOp ? '<span class="op-badge">[OP]</span>' : ''}</h3>
                     <p>${post.message}</p>
+                    ${post.isOp ? `<button class="delete-button" onclick="deletePost(${index})">Beitrag löschen</button>` : ''}
                     <h4>Antworten:</h4>
                     <div id="replies-${index}">
                         ${post.replies.map(reply => `
                             <div class="reply">
-                                <h4>${reply.name}</h4>
+                                <h4>${reply.name} ${reply.isOp ? '<span class="op-badge">[OP]</span>' : ''}</h4>
                                 <p>${reply.message}</p>
                             </div>
                         `).join('')}
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="reply-email-${index}" placeholder="Deine E-Mail">
                     </div>
                     <div class="form-group">
                         <input type="text" id="reply-name-${index}" placeholder="Dein Name">
