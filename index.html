@@ -62,13 +62,12 @@
         }
 
         // Game mechanics
-        function moveHand(keyCode) {
-            if (keyCode === 'ArrowUp' && hand.y > 0) {
-                hand.y -= hand.speed;
-            }
-            if (keyCode === 'ArrowDown' && hand.y + hand.height < canvas.height) {
-                hand.y += hand.speed;
-            }
+        function moveHand(deltaY) {
+            hand.y += deltaY;
+
+            // Prevent moving out of bounds
+            if (hand.y < 0) hand.y = 0;
+            if (hand.y + hand.height > canvas.height) hand.y = canvas.height - hand.height;
         }
 
         function moveChips() {
@@ -155,9 +154,24 @@
             requestAnimationFrame(update);
         }
 
-        // Key controls
-        window.addEventListener('keydown', (e) => {
-            moveHand(e.key);
+        // Touch controls
+        let lastTouchY = null;
+
+        canvas.addEventListener('touchstart', (e) => {
+            lastTouchY = e.touches[0].clientY;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (lastTouchY) {
+                const currentTouchY = e.touches[0].clientY;
+                const deltaY = currentTouchY - lastTouchY;
+                moveHand(deltaY);
+                lastTouchY = currentTouchY;
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            lastTouchY = null;
         });
 
         // Start game
