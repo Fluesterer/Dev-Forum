@@ -40,6 +40,13 @@
             padding: 10px;
             border-radius: 5px;
         }
+        .captcha {
+            font-size: 16px;
+            color: white;
+        }
+        .banned {
+            background-color: red;
+        }
     </style>
 </head>
 <body>
@@ -47,49 +54,102 @@
         <h1>Willkommen im Coding Forum</h1>
         <input type="text" id="nickname" placeholder="Gib deinen Nickname ein" required>
         <textarea id="comment" placeholder="Schreibe deinen Kommentar..." required></textarea>
+        <div class="captcha">
+            <label for="captcha">Was ist 3 + 5?</label>
+            <input type="number" id="captcha" required>
+        </div>
         <button onclick="postComment()">Posten</button>
         <div id="comments"></div>
     </div>
+
     <script>
-        // Lade Kommentare aus dem LocalStorage, falls vorhanden
+        const bannedUsers = ['fluesterer'];  // Liste der gesperrten Benutzernamen
+        const bannedWords = ['fick dich', 'fuck', 'shit'];  // Filter für ungewünschte Wörter
+
+        // Setze das Kommentar-Delay
+        let lastPostTime = 0; // Zeit des letzten Kommentars
+
+        // Lade Kommentare und Nickname
         function loadComments() {
             const comments = JSON.parse(localStorage.getItem('comments')) || [];
             const commentsDiv = document.getElementById('comments');
-            commentsDiv.innerHTML = '';  // Leere die Kommentare
+            commentsDiv.innerHTML = ''; // Leere die Liste der Kommentare
 
             comments.forEach(comment => {
                 const div = document.createElement('div');
                 div.classList.add('comment');
-                div.innerHTML = `<strong>${comment.nickname}</strong>: <p>${comment.text}</p>`;
+                if (comment.isBanned) {
+                    div.classList.add('banned');
+                }
+                div.innerHTML = `<strong>${comment.nickname}</strong>: <p>${comment.text}</p> <button onclick="deleteComment('${comment.nickname}')">Löschen</button>`;
                 commentsDiv.appendChild(div);
             });
         }
 
-        // Speichere den neuen Kommentar im LocalStorage
-        function postComment() {
-            const nickname = document.getElementById('nickname').value;
-            const comment = document.getElementById('comment').value;
-
-            if (nickname && comment) {
-                // Hol die aktuellen Kommentare aus dem LocalStorage
-                const comments = JSON.parse(localStorage.getItem('comments')) || [];
-                comments.push({ nickname, text: comment });
-
-                // Speichere die neuen Kommentare im LocalStorage
-                localStorage.setItem('comments', JSON.stringify(comments));
-
-                // Lade die Kommentare neu
-                loadComments();
-
-                // Leere die Eingabefelder
-                document.getElementById('nickname').value = '';
-                document.getElementById('comment').value = '';
-            } else {
-                alert('Bitte Nickname und Kommentar ausfüllen!');
-            }
+        // Speichern der Kommentare
+        function saveComment(nickname, commentText) {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+            comments.push({ nickname, text: commentText, isBanned: false });
+            localStorage.setItem('comments', JSON.stringify(comments));
         }
 
-        // Kommentare beim Laden der Seite anzeigen
+        // Überprüfe auf verbotene Wörter
+        function containsBannedWords(text) {
+            return bannedWords.some(word => text.toLowerCase().includes(word));
+        }
+
+        // Überprüfe, ob der Nickname "fluesterer" verwendet wird
+        function isNicknameReserved(nickname) {
+            return nickname.toLowerCase() === 'fluesterer';
+        }
+
+        // Überprüfe, ob das Captcha korrekt ist
+        function isCaptchaCorrect() {
+            const captchaInput = document.getElementById('captcha').value;
+            return captchaInput == 8; // Antwort auf "Was ist 3 + 5?" ist 8
+        }
+
+        // Kommentarfunktion
+        function postComment() {
+            const nickname = document.getElementById('nickname').value;
+            const commentText = document.getElementById('comment').value;
+
+            const currentTime = Date.now();
+            if (currentTime - lastPostTime < 180000) { // 3 Minuten Delay
+                alert('Bitte warte 3 Minuten, bevor du einen weiteren Kommentar schreibst.');
+                return;
+            }
+
+            // Verhindere Spam und Captcha Überprüfung
+            if (!isCaptchaCorrect()) {
+                alert('Captcha ist falsch! Bitte versuche es erneut.');
+                return;
+            }
+
+            if (containsBannedWords(commentText)) {
+                alert('Dein Kommentar enthält verbotene Wörter!');
+                return;
+            }
+
+            if (isNicknameReserved(nickname)) {
+                alert('Der Nickname "fluesterer" ist nur für den Admin reserviert!');
+                return;
+            }
+
+            // Speichern des Kommentars
+            saveComment(nickname, commentText);
+            lastPostTime = currentTime; // Setze die Zeit des letzten Posts
+            loadComments(); // Lade die Kommentare neu
+        }
+
+        // Löschen eines Kommentars
+        function deleteComment(nickname) {
+            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+            const updatedComments = comments.filter(comment => comment.nickname !== nickname);
+            localStorage.setItem('comments', JSON.stringify(updatedComments));
+            loadComments(); // Kommentare neu laden
+        }
+
         window.onload = loadComments;
     </script>
 </body>
