@@ -3,215 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reddit-ähnliches Forum</title>
+    <title>Discord-ähnliches Forum</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            background-color: #2f3136;
+            color: #fff;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
-
+        
         .container {
             width: 80%;
             margin: 0 auto;
             padding-top: 50px;
         }
-
+        
         .header {
-            background-color: #24292f;
+            background-color: #202225;
             padding: 20px;
-            color: white;
             text-align: center;
-            font-size: 28px;
+            font-size: 24px;
+            font-weight: bold;
         }
-
-        .thread, .reply {
-            background-color: #ffffff;
-            margin: 10px 0;
+        
+        .message {
+            background-color: #36393f;
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
         }
 
-        .thread .title, .reply .user {
-            font-size: 18px;
+        .message .user {
+            color: #7289da;
             font-weight: bold;
-            color: #0366d6;
         }
 
-        .thread .content, .reply .content {
-            font-size: 16px;
+        .message .content {
+            color: #dcddde;
+            margin-top: 5px;
+        }
+
+        .message .actions {
+            display: flex;
             margin-top: 10px;
+            justify-content: space-between;
         }
 
-        .vote-buttons {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        .upvote, .downvote {
-            font-size: 20px;
-            margin: 0 5px;
-            color: #0366d6;
-        }
-
-        .comment-button {
-            background-color: #0366d6;
-            color: white;
+        .message .reply-button {
+            background-color: #7289da;
+            border: none;
             padding: 5px 10px;
+            color: white;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        .comment-button:hover {
-            background-color: #0056b3;
+        .message .vote-button {
+            background-color: #5865f2;
+            border: none;
+            padding: 5px 10px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .reply-box {
+        .message .vote-button:hover, .message .reply-button:hover {
+            opacity: 0.7;
+        }
+
+        .input-container {
             margin-top: 20px;
+            background-color: #202225;
+            padding: 20px;
+            border-radius: 8px;
         }
 
-        .reply-box input, .reply-box textarea {
+        .input-container input,
+        .input-container textarea {
             width: 100%;
             padding: 10px;
-            margin: 5px 0;
+            margin-bottom: 10px;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            border: 1px solid #4f545c;
+            background-color: #2f3136;
+            color: #fff;
         }
 
-        .reply-box button {
-            background-color: #36b37e;
-            color: white;
-            padding: 10px;
+        .input-container button {
+            background-color: #5865f2;
             border: none;
+            padding: 10px;
             border-radius: 5px;
+            color: white;
             cursor: pointer;
         }
 
-        .reply-box button:hover {
-            background-color: #28a45e;
-        }
-
-        .thread-actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            margin-top: 10px;
+        .input-container button:hover {
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        Reddit-ähnliches Forum
-    </div>
-
+    <div class="header">Discord-ähnliches Forum</div>
+    
     <div class="container">
-        <!-- Beitrag erstellen -->
-        <div class="input-section">
-            <input type="text" id="newUser" placeholder="Dein Name" style="width: 30%; padding: 10px; margin-bottom: 10px;">
-            <textarea id="newPost" placeholder="Schreibe einen neuen Beitrag..." style="width: 100%; padding: 10px; margin-bottom: 10px;"></textarea>
-            <button onclick="createThread()" style="background-color: #36b37e; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Beitrag erstellen</button>
+        <div class="input-container">
+            <input type="text" id="userName" placeholder="Dein Name">
+            <textarea id="postContent" placeholder="Schreibe eine Nachricht..."></textarea>
+            <button onclick="createMessage()">Nachricht senden</button>
         </div>
-
-        <!-- Threads -->
-        <div id="threadsContainer"></div>
+        
+        <div id="messagesContainer">
+            <!-- Hier werden Nachrichten dynamisch angezeigt -->
+        </div>
     </div>
 
     <script>
-        // Erstelle Threads und speichere sie lokal
-        let threads = JSON.parse(localStorage.getItem('threads')) || [];
-
-        function createThread() {
-            const user = document.getElementById('newUser').value.trim();
-            const content = document.getElementById('newPost').value.trim();
-
-            if (!user || !content) {
-                alert('Bitte gib deinen Namen und einen Beitrag ein.');
-                return;
-            }
-
-            const newThread = {
-                user,
-                content,
-                votes: 0,
-                replies: [],
-                id: Date.now() // Zeitstempel als ID
-            };
-
-            threads.push(newThread);
-            localStorage.setItem('threads', JSON.stringify(threads));
-            renderThreads();
-            document.getElementById('newPost').value = ''; // Textfeld nach dem Erstellen leeren
-        }
-
-        function renderThreads() {
-            const container = document.getElementById('threadsContainer');
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
             container.innerHTML = '';
-
-            threads.forEach(thread => {
-                const threadElement = document.createElement('div');
-                threadElement.className = 'thread';
-                threadElement.innerHTML = `
-                    <div class="title">${thread.user}</div>
-                    <div class="content">${thread.content}</div>
-                    <div class="thread-actions">
-                        <span class="vote-buttons">
-                            <span class="upvote" onclick="vote(${thread.id}, 1)">↑</span>
-                            <span>${thread.votes}</span>
-                            <span class="downvote" onclick="vote(${thread.id}, -1)">↓</span>
-                        </span>
-                        <button class="comment-button" onclick="toggleReplies(${thread.id})">Antworten</button>
+            
+            messages.forEach((message, index) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                
+                messageDiv.innerHTML = `
+                    <div class="user">${message.user}</div>
+                    <div class="content">${message.content}</div>
+                    <div class="actions">
+                        <button class="reply-button" onclick="showReplyForm(${index})">Antworten</button>
+                        <button class="vote-button" onclick="upvote(${index})">↑ ${message.votes}</button>
                     </div>
-                    <div class="reply-box" id="replyBox-${thread.id}" style="display: none;">
-                        <input type="text" id="replyUser-${thread.id}" placeholder="Dein Name">
-                        <textarea id="replyContent-${thread.id}" placeholder="Schreibe eine Antwort..."></textarea>
-                        <button onclick="postReply(${thread.id})">Antwort senden</button>
+                    <div id="replyForm-${index}" class="input-container" style="display: none;">
+                        <textarea id="replyContent-${index}" placeholder="Schreibe eine Antwort..."></textarea>
+                        <button onclick="postReply(${index})">Antwort posten</button>
                     </div>
-                    <div id="replies-${thread.id}">
-                        ${thread.replies.map(reply => `
-                            <div class="reply">
+                    <div id="replies-${index}">
+                        ${message.replies.map(reply => `
+                            <div class="message">
                                 <div class="user">${reply.user}</div>
                                 <div class="content">${reply.content}</div>
                             </div>
                         `).join('')}
                     </div>
                 `;
-                container.appendChild(threadElement);
+                container.appendChild(messageDiv);
             });
         }
 
-        function vote(threadId, direction) {
-            const thread = threads.find(t => t.id === threadId);
-            thread.votes += direction;
-            localStorage.setItem('threads', JSON.stringify(threads));
-            renderThreads();
-        }
+        function createMessage() {
+            const userName = document.getElementById('userName').value.trim();
+            const postContent = document.getElementById('postContent').value.trim();
 
-        function toggleReplies(threadId) {
-            const replyBox = document.getElementById(`replyBox-${threadId}`);
-            replyBox.style.display = replyBox.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function postReply(threadId) {
-            const replyUser = document.getElementById(`replyUser-${threadId}`).value.trim();
-            const replyContent = document.getElementById(`replyContent-${threadId}`).value.trim();
-
-            if (!replyUser || !replyContent) {
-                alert('Bitte gib deinen Namen und eine Antwort ein.');
+            if (!userName || !postContent) {
+                alert('Bitte gib deinen Namen und den Inhalt der Nachricht ein!');
                 return;
             }
 
-            const thread = threads.find(t => t.id === threadId);
-            thread.replies.push({
+            const newMessage = {
+                user: userName,
+                content: postContent,
+                votes: 0,
+                replies: []
+            };
+
+            messages.push(newMessage);
+            localStorage.setItem('messages', JSON.stringify(messages));
+            renderMessages();
+
+            // Input zurücksetzen
+            document.getElementById('userName').value = '';
+            document.getElementById('postContent').value = '';
+        }
+
+        function upvote(index) {
+            messages[index].votes += 1;
+            localStorage.setItem('messages', JSON.stringify(messages));
+            renderMessages();
+        }
+
+        function showReplyForm(index) {
+            const replyForm = document.getElementById(`replyForm-${index}`);
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function postReply(index) {
+            const replyContent = document.getElementById(`replyContent-${index}`).value.trim();
+
+            if (!replyContent) {
+                alert('Bitte gib deine Antwort ein!');
+                return;
+            }
+
+            const replyUser = document.getElementById('userName').value.trim() || 'Anonymer Nutzer';
+
+            messages[index].replies.push({
                 user: replyUser,
                 content: replyContent
             });
-            localStorage.setItem('threads', JSON.stringify(threads));
-            renderThreads();
+
+            localStorage.setItem('messages', JSON.stringify(messages));
+            renderMessages();
         }
 
-        renderThreads(); // Initiale Darstellung der Threads
+        // Initialer Aufruf, um alle Nachrichten anzuzeigen
+        renderMessages();
     </script>
 </body>
 </html>
