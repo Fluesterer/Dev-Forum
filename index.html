@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum wie Reddit</title>
+    <title>Forum: Thema XYZ</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f6f7f8;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
         }
 
         header {
-            background-color: #ff4500;
+            background-color: #0078D7;
             color: white;
-            padding: 10px 20px;
             text-align: center;
+            padding: 15px 20px;
         }
 
         header h1 {
@@ -27,68 +27,68 @@
         .container {
             max-width: 800px;
             margin: 20px auto;
-            padding: 10px;
-        }
-
-        .post {
             background: white;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: flex-start;
         }
 
-        .votes {
-            margin-right: 15px;
-            text-align: center;
-            font-size: 1.2rem;
+        .topic {
+            margin-bottom: 20px;
+        }
+
+        .topic h2 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .comment-section {
+            margin-top: 30px;
+        }
+
+        .comment {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .comment h4 {
+            margin: 0 0 5px;
+            font-size: 1rem;
+            color: #0078D7;
+        }
+
+        .comment p {
+            margin: 0;
             color: #555;
         }
 
-        .votes button {
-            display: block;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #888;
+        .comment-form {
+            margin-top: 20px;
         }
 
-        .votes button:hover {
-            color: #ff4500;
+        .comment-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
         }
 
-        .post-content {
-            flex: 1;
-        }
-
-        .post-title {
-            font-size: 1.5rem;
-            color: #333;
-            margin: 0;
-        }
-
-        .post-meta {
-            font-size: 0.9rem;
-            color: #777;
-            margin: 5px 0;
-        }
-
-        .post-actions {
+        .comment-form button {
             margin-top: 10px;
-            font-size: 0.9rem;
+            background-color: #0078D7;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .post-actions a {
-            text-decoration: none;
-            color: #ff4500;
-            margin-right: 10px;
-        }
-
-        .post-actions a:hover {
-            text-decoration: underline;
+        .comment-form button:hover {
+            background-color: #005bb5;
         }
 
         footer {
@@ -102,65 +102,53 @@
 </head>
 <body>
     <header>
-        <h1>Reddit-ähnliches Forum</h1>
+        <h1>Forum: Thema XYZ</h1>
     </header>
     <div class="container">
-        <!-- Post 1 -->
-        <div class="post">
-            <div class="votes">
-                <button>&#9650;</button>
-                <span>15</span>
-                <button>&#9660;</button>
-            </div>
-            <div class="post-content">
-                <h2 class="post-title">Diskussion über Technik</h2>
-                <p class="post-meta">Erstellt von Max | 25.12.2024</p>
-                <div class="post-actions">
-                    <a href="#">Kommentare (5)</a>
-                    <a href="#">Teilen</a>
-                    <a href="#">Melden</a>
-                </div>
-            </div>
+        <div class="topic">
+            <h2>Thema: Was denkt ihr über XYZ?</h2>
+            <p>Diskutiert alles rund um XYZ und teilt eure Meinungen und Erfahrungen!</p>
         </div>
-
-        <!-- Post 2 -->
-        <div class="post">
-            <div class="votes">
-                <button>&#9650;</button>
-                <span>23</span>
-                <button>&#9660;</button>
+        <div class="comment-section">
+            <h3>Kommentare</h3>
+            <!-- Beispiel für einen Kommentar -->
+            <div class="comment">
+                <h4>Max Mustermann</h4>
+                <p>Ich finde XYZ großartig, weil es viele Vorteile bietet!</p>
             </div>
-            <div class="post-content">
-                <h2 class="post-title">Was kocht ihr heute?</h2>
-                <p class="post-meta">Erstellt von Julia | 24.12.2024</p>
-                <div class="post-actions">
-                    <a href="#">Kommentare (8)</a>
-                    <a href="#">Teilen</a>
-                    <a href="#">Melden</a>
-                </div>
+            <div class="comment">
+                <h4>Lisa Müller</h4>
+                <p>Meiner Meinung nach gibt es aber auch einige Nachteile...</p>
             </div>
-        </div>
-
-        <!-- Post 3 -->
-        <div class="post">
-            <div class="votes">
-                <button>&#9650;</button>
-                <span>9</span>
-                <button>&#9660;</button>
-            </div>
-            <div class="post-content">
-                <h2 class="post-title">Reisetipps für Italien</h2>
-                <p class="post-meta">Erstellt von Anna | 23.12.2024</p>
-                <div class="post-actions">
-                    <a href="#">Kommentare (12)</a>
-                    <a href="#">Teilen</a>
-                    <a href="#">Melden</a>
-                </div>
+            <!-- Bereich für neue Kommentare -->
+            <div class="comment-form">
+                <h3>Neuen Kommentar hinzufügen</h3>
+                <textarea id="comment" rows="4" placeholder="Dein Kommentar..."></textarea>
+                <button onclick="postComment()">Posten</button>
             </div>
         </div>
     </div>
     <footer>
-        <p>&copy; 2024 Forum wie Reddit. Alle Rechte vorbehalten.</p>
+        <p>&copy; 2024 Forum für XYZ. Alle Rechte vorbehalten.</p>
     </footer>
+
+    <script>
+        function postComment() {
+            const commentText = document.getElementById('comment').value;
+            if (commentText.trim() === '') {
+                alert('Bitte schreibe einen Kommentar!');
+                return;
+            }
+            const commentSection = document.querySelector('.comment-section');
+            const newComment = document.createElement('div');
+            newComment.classList.add('comment');
+            newComment.innerHTML = `
+                <h4>Unbekannter Nutzer</h4>
+                <p>${commentText}</p>
+            `;
+            commentSection.insertBefore(newComment, commentSection.querySelector('.comment-form'));
+            document.getElementById('comment').value = '';
+        }
+    </script>
 </body>
 </html>
