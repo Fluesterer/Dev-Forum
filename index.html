@@ -3,271 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
+    <title>Reddit-ähnliches Forum</title>
     <style>
-        /* Basis-Styles */
         body {
             font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
-            background-color: #1a1a1a;
-            color: #eaeaea;
         }
 
         .container {
-            max-width: 1200px;
+            width: 80%;
             margin: 0 auto;
-            padding: 10px;
+            padding-top: 50px;
         }
 
         .header {
-            background-color: #2f3136;
+            background-color: #24292f;
             padding: 20px;
+            color: white;
             text-align: center;
-            color: #ffffff;
-            font-size: 24px;
-            font-weight: bold;
-            border-bottom: 2px solid #444;
+            font-size: 28px;
         }
 
-        .thread {
-            background-color: #2f3136;
-            margin-bottom: 15px;
+        .thread, .reply {
+            background-color: #ffffff;
+            margin: 10px 0;
             padding: 15px;
             border-radius: 8px;
-            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .thread .title {
+        .thread .title, .reply .user {
             font-size: 18px;
             font-weight: bold;
-            margin-bottom: 10px;
-            color: #7289da;
+            color: #0366d6;
         }
 
-        .thread .content {
-            margin-bottom: 10px;
+        .thread .content, .reply .content {
+            font-size: 16px;
+            margin-top: 10px;
         }
 
-        .thread .info {
-            font-size: 12px;
-            color: #b9bbbe;
-            margin-bottom: 10px;
-        }
-
-        .thread .reply-button {
-            background-color: #5865f2;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            color: #ffffff;
+        .vote-buttons {
+            margin-right: 10px;
             cursor: pointer;
         }
 
-        .thread .reply-button:hover {
-            background-color: #4e5cd1;
+        .upvote, .downvote {
+            font-size: 20px;
+            margin: 0 5px;
+            color: #0366d6;
+        }
+
+        .comment-button {
+            background-color: #0366d6;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .comment-button:hover {
+            background-color: #0056b3;
         }
 
         .reply-box {
-            margin-left: 20px;
-            padding-left: 10px;
-            border-left: 2px solid #444;
+            margin-top: 20px;
         }
 
-        .reply-box .reply {
-            background-color: #40444b;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .reply-box .user {
-            font-weight: bold;
-            color: #7289da;
-        }
-
-        .input-bar {
-            background-color: #2f3136;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .input-bar input, .input-bar textarea, .popup input, .popup textarea {
+        .reply-box input, .reply-box textarea {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
-            border: none;
+            margin: 5px 0;
             border-radius: 5px;
-            background-color: #40444b;
-            color: #ffffff;
+            border: 1px solid #ccc;
         }
 
-        .input-bar button, .popup button {
+        .reply-box button {
+            background-color: #36b37e;
+            color: white;
             padding: 10px;
-            background-color: #5865f2;
             border: none;
             border-radius: 5px;
-            color: #ffffff;
             cursor: pointer;
         }
 
-        .input-bar button:hover, .popup button:hover {
-            background-color: #4e5cd1;
+        .reply-box button:hover {
+            background-color: #28a45e;
         }
 
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #2f3136;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            display: none;
-        }
-
-        .popup .close-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #ff5c5c;
-            border: none;
-            border-radius: 5px;
-            color: #ffffff;
-            cursor: pointer;
-        }
-
-        .popup .close-button:hover {
-            background-color: #e04747;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
+        .thread-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="header">Forum</div>
+    <div class="header">
+        Reddit-ähnliches Forum
+    </div>
 
     <div class="container">
-        <div class="input-bar">
-            <input type="text" id="newThreadUser" placeholder="Dein Name">
-            <input type="email" id="newThreadEmail" placeholder="Deine E-Mail" style="display: none;">
-            <textarea id="newThreadContent" placeholder="Schreibe einen neuen Beitrag..."></textarea>
-            <button onclick="createThread()">Beitrag erstellen</button>
+        <!-- Beitrag erstellen -->
+        <div class="input-section">
+            <input type="text" id="newUser" placeholder="Dein Name" style="width: 30%; padding: 10px; margin-bottom: 10px;">
+            <textarea id="newPost" placeholder="Schreibe einen neuen Beitrag..." style="width: 100%; padding: 10px; margin-bottom: 10px;"></textarea>
+            <button onclick="createThread()" style="background-color: #36b37e; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">Beitrag erstellen</button>
         </div>
 
+        <!-- Threads -->
         <div id="threadsContainer"></div>
     </div>
 
-    <!-- Reply Popup -->
-    <div class="overlay" id="overlay"></div>
-    <div class="popup" id="replyPopup">
-        <button class="close-button" onclick="closeReplyPopup()">✖</button>
-        <h3>Antworten</h3>
-        <input type="text" id="replyUser" placeholder="Dein Name">
-        <input type="email" id="replyEmail" placeholder="Deine E-Mail" style="display: none;">
-        <textarea id="replyContent" placeholder="Schreibe deine Antwort..."></textarea>
-        <button onclick="submitReply()">Antwort senden</button>
-    </div>
-
     <script>
-        const whitelist = ['nico.friesen1bausa@gmail.com'];
-        const threads = JSON.parse(localStorage.getItem('forumThreads')) || [];
-
-        let replyThreadIndex = null;
+        // Erstelle Threads und speichere sie lokal
+        let threads = JSON.parse(localStorage.getItem('threads')) || [];
 
         function createThread() {
-            const user = document.getElementById('newThreadUser').value.trim();
-            const content = document.getElementById('newThreadContent').value.trim();
+            const user = document.getElementById('newUser').value.trim();
+            const content = document.getElementById('newPost').value.trim();
 
             if (!user || !content) {
-                alert('Bitte alle Felder ausfüllen!');
+                alert('Bitte gib deinen Namen und einen Beitrag ein.');
                 return;
             }
 
-            threads.push({ user, content, replies: [] });
-            saveThreads();
-            renderThreads();
-        }
+            const newThread = {
+                user,
+                content,
+                votes: 0,
+                replies: [],
+                id: Date.now() // Zeitstempel als ID
+            };
 
-        function saveThreads() {
-            localStorage.setItem('forumThreads', JSON.stringify(threads));
+            threads.push(newThread);
+            localStorage.setItem('threads', JSON.stringify(threads));
+            renderThreads();
+            document.getElementById('newPost').value = ''; // Textfeld nach dem Erstellen leeren
         }
 
         function renderThreads() {
             const container = document.getElementById('threadsContainer');
             container.innerHTML = '';
 
-            threads.forEach((thread, index) => {
+            threads.forEach(thread => {
                 const threadElement = document.createElement('div');
                 threadElement.className = 'thread';
-                threadElement.onclick = () => openThread(index);
-
-                let repliesHtml = '';
-                thread.replies.forEach(reply => {
-                    repliesHtml += `
-                        <div class="reply">
-                            <span class="user">${reply.user}</span>: ${reply.content}
-                        </div>
-                    `;
-                });
-
                 threadElement.innerHTML = `
                     <div class="title">${thread.user}</div>
                     <div class="content">${thread.content}</div>
-                    <div class="info">${thread.replies.length} Antworten</div>
-                    <button class="reply-button">Antworten</button>
-                    <div class="reply-box">${repliesHtml}</div>
+                    <div class="thread-actions">
+                        <span class="vote-buttons">
+                            <span class="upvote" onclick="vote(${thread.id}, 1)">↑</span>
+                            <span>${thread.votes}</span>
+                            <span class="downvote" onclick="vote(${thread.id}, -1)">↓</span>
+                        </span>
+                        <button class="comment-button" onclick="toggleReplies(${thread.id})">Antworten</button>
+                    </div>
+                    <div class="reply-box" id="replyBox-${thread.id}" style="display: none;">
+                        <input type="text" id="replyUser-${thread.id}" placeholder="Dein Name">
+                        <textarea id="replyContent-${thread.id}" placeholder="Schreibe eine Antwort..."></textarea>
+                        <button onclick="postReply(${thread.id})">Antwort senden</button>
+                    </div>
+                    <div id="replies-${thread.id}">
+                        ${thread.replies.map(reply => `
+                            <div class="reply">
+                                <div class="user">${reply.user}</div>
+                                <div class="content">${reply.content}</div>
+                            </div>
+                        `).join('')}
+                    </div>
                 `;
-
                 container.appendChild(threadElement);
             });
         }
 
-        function openThread(index) {
-            replyThreadIndex = index;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('replyPopup').style.display = 'block';
+        function vote(threadId, direction) {
+            const thread = threads.find(t => t.id === threadId);
+            thread.votes += direction;
+            localStorage.setItem('threads', JSON.stringify(threads));
+            renderThreads();
         }
 
-        function closeReplyPopup() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('replyPopup').style.display = 'none';
+        function toggleReplies(threadId) {
+            const replyBox = document.getElementById(`replyBox-${threadId}`);
+            replyBox.style.display = replyBox.style.display === 'none' ? 'block' : 'none';
         }
 
-        function submitReply() {
-            const user = document.getElementById('replyUser').value.trim();
-            const content = document.getElementById('replyContent').value.trim();
+        function postReply(threadId) {
+            const replyUser = document.getElementById(`replyUser-${threadId}`).value.trim();
+            const replyContent = document.getElementById(`replyContent-${threadId}`).value.trim();
 
-            if (!user || !content) {
-                alert('Bitte alle Felder ausfüllen!');
+            if (!replyUser || !replyContent) {
+                alert('Bitte gib deinen Namen und eine Antwort ein.');
                 return;
             }
 
-            threads[replyThreadIndex].replies.push({ user, content });
-            saveThreads();
+            const thread = threads.find(t => t.id === threadId);
+            thread.replies.push({
+                user: replyUser,
+                content: replyContent
+            });
+            localStorage.setItem('threads', JSON.stringify(threads));
             renderThreads();
-            closeReplyPopup();
         }
 
-        renderThreads();
+        renderThreads(); // Initiale Darstellung der Threads
     </script>
 </body>
 </html>
