@@ -1,118 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chrome Dino Game</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #f5f5f5;
-    }
-    #gameCanvas {
-      background-color: #fff;
-      display: block;
-      margin: 0 auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum wie Reddit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f6f7f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #ff4500;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        .post {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .votes {
+            margin-right: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .votes button {
+            display: block;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .votes button:hover {
+            color: #ff4500;
+        }
+
+        .post-content {
+            flex: 1;
+        }
+
+        .post-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .post-meta {
+            font-size: 0.9rem;
+            color: #777;
+            margin: 5px 0;
+        }
+
+        .post-actions {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .post-actions a {
+            text-decoration: none;
+            color: #ff4500;
+            margin-right: 10px;
+        }
+
+        .post-actions a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            background: #333;
+            color: white;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+    <header>
+        <h1>Reddit-ähnliches Forum</h1>
+    </header>
+    <div class="container">
+        <!-- Post 1 -->
+        <div class="post">
+            <div class="votes">
+                <button>&#9650;</button>
+                <span>15</span>
+                <button>&#9660;</button>
+            </div>
+            <div class="post-content">
+                <h2 class="post-title">Diskussion über Technik</h2>
+                <p class="post-meta">Erstellt von Max | 25.12.2024</p>
+                <div class="post-actions">
+                    <a href="#">Kommentare (5)</a>
+                    <a href="#">Teilen</a>
+                    <a href="#">Melden</a>
+                </div>
+            </div>
+        </div>
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const dinoHeight = 50;
-    const dinoWidth = 50;
-    const dinoSpeed = 5;
+        <!-- Post 2 -->
+        <div class="post">
+            <div class="votes">
+                <button>&#9650;</button>
+                <span>23</span>
+                <button>&#9660;</button>
+            </div>
+            <div class="post-content">
+                <h2 class="post-title">Was kocht ihr heute?</h2>
+                <p class="post-meta">Erstellt von Julia | 24.12.2024</p>
+                <div class="post-actions">
+                    <a href="#">Kommentare (8)</a>
+                    <a href="#">Teilen</a>
+                    <a href="#">Melden</a>
+                </div>
+            </div>
+        </div>
 
-    let dinoY = canvas.height - dinoHeight;
-    let dinoX = 50;
-    let isJumping = false;
-    let jumpHeight = 0;
-    let gravity = 0.8;
-    let jumpStrength = 20;
-
-    let cactusWidth = 20;
-    let cactusHeight = 40;
-    let cactusX = canvas.width;
-    let cactusSpeed = 5;
-
-    function setUpCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-
-    function drawDino() {
-      ctx.fillStyle = '#555';
-      ctx.fillRect(dinoX, dinoY - jumpHeight, dinoWidth, dinoHeight);
-    }
-
-    function drawCactus() {
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(cactusX, canvas.height - cactusHeight, cactusWidth, cactusHeight);
-    }
-
-    function moveCactus() {
-      cactusX -= cactusSpeed;
-      if (cactusX + cactusWidth < 0) {
-        cactusX = canvas.width;
-      }
-    }
-
-    function jump() {
-      if (isJumping) {
-        jumpHeight += jumpStrength;
-        if (jumpHeight >= 100) {
-          isJumping = false;
-        }
-      } else {
-        if (jumpHeight > 0) {
-          jumpHeight -= gravity;
-        } else {
-          jumpHeight = 0;
-        }
-      }
-    }
-
-    function detectCollision() {
-      if (
-        dinoX + dinoWidth > cactusX &&
-        dinoX < cactusX + cactusWidth &&
-        dinoY - jumpHeight + dinoHeight > canvas.height - cactusHeight
-      ) {
-        alert('Game Over');
-        resetGame();
-      }
-    }
-
-    function resetGame() {
-      dinoY = canvas.height - dinoHeight;
-      dinoX = 50;
-      cactusX = canvas.width;
-      jumpHeight = 0;
-    }
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawDino();
-      drawCactus();
-      moveCactus();
-      jump();
-      detectCollision();
-      requestAnimationFrame(gameLoop);
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && !isJumping) {
-        isJumping = true;
-      }
-    });
-
-    setUpCanvas();
-    gameLoop();
-  </script>
+        <!-- Post 3 -->
+        <div class="post">
+            <div class="votes">
+                <button>&#9650;</button>
+                <span>9</span>
+                <button>&#9660;</button>
+            </div>
+            <div class="post-content">
+                <h2 class="post-title">Reisetipps für Italien</h2>
+                <p class="post-meta">Erstellt von Anna | 23.12.2024</p>
+                <div class="post-actions">
+                    <a href="#">Kommentare (12)</a>
+                    <a href="#">Teilen</a>
+                    <a href="#">Melden</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 Forum wie Reddit. Alle Rechte vorbehalten.</p>
+    </footer>
 </body>
 </html>
