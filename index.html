@@ -5,68 +5,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wissen und Lernen</title>
     <style>
+        /* Allgemeine Einstellungen */
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            background: linear-gradient(to right, #f0f8ff, #dbefff);
+            background-color: #f7faff;
             color: #333;
+            line-height: 1.6;
         }
 
+        /* Header */
         header {
-            background: #00509e;
+            background: linear-gradient(to right, #00509e, #003d73);
             color: white;
-            padding: 20px 10px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            padding: 20px 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         header h1 {
+            font-size: 3em;
             margin: 0;
-            font-size: 2.5em;
         }
 
         header p {
-            margin: 5px 0 0;
             font-size: 1.2em;
+            margin: 10px 0 0;
         }
 
+        /* Navigation */
+        nav {
+            background: #004080;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: url('https://source.unsplash.com/1600x900/?books,learning') no-repeat center center/cover;
+            height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero h2 {
+            font-size: 3em;
+        }
+
+        .hero p {
+            font-size: 1.5em;
+        }
+
+        /* Main Content */
         main {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 20px auto;
             padding: 0 15px;
         }
 
         section {
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
 
         section h2 {
             color: #00509e;
             border-left: 5px solid #00509e;
-            padding-left: 10px;
+            padding-left: 15px;
+            margin-bottom: 20px;
         }
 
         section p {
             text-align: justify;
         }
 
+        /* Zitate */
         .quote {
             background: #f0f8ff;
             border-left: 5px solid #00509e;
-            padding: 10px 15px;
+            padding: 15px;
             font-style: italic;
             margin: 20px 0;
         }
 
+        /* Karten-Layout */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .card h3 {
+            margin: 15px;
+            font-size: 1.2em;
+        }
+
+        .card p {
+            margin: 0 15px 15px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
         footer {
-            background: #00509e;
+            background: #003d73;
             color: white;
             text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            padding: 20px 10px;
+            margin-top: 40px;
         }
 
         footer p {
@@ -76,48 +161,96 @@
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <h1>Wissen und Lernen</h1>
-        <p>Die Reise des Wissens hört niemals auf.</p>
+        <p>Entdecke, was möglich ist, wenn du dich auf die Reise des Wissens begibst.</p>
     </header>
 
+    <!-- Navigation -->
+    <nav>
+        <a href="#warum">Warum Wissen?</a>
+        <a href="#wissenschaft">Wissenschaft</a>
+        <a href="#geschichte">Geschichte</a>
+        <a href="#lernen">Tipps zum Lernen</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div>
+            <h2>Die Welt des Wissens wartet auf dich</h2>
+            <p>Beginne heute deine Reise des Lernens und Entdeckens.</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
     <main>
-        <section>
+        <!-- Warum Wissen -->
+        <section id="warum">
             <h2>Warum Wissen wichtig ist</h2>
             <p>
-                Wissen ist die Grundlage für Fortschritt und Innovation. Es hilft uns, die Welt um uns herum besser zu verstehen,
-                Probleme zu lösen und neue Möglichkeiten zu entdecken. Vom Lesen eines Buches bis hin zu wissenschaftlichen 
-                Durchbrüchen – Wissen treibt uns an, größer zu denken und weiter zu gehen.
+                Wissen ist die Grundlage für Fortschritt und Innovation. Es hilft uns, die Welt besser zu verstehen und die Herausforderungen des Lebens zu meistern. 
+                Ob in der Wissenschaft, Kunst oder Technologie – das Streben nach Wissen treibt die Menschheit an.
             </p>
-        </section>
-
-        <section>
-            <h2>Der Wert des Lernens</h2>
-            <p>
-                Lernen ist nicht nur ein Prozess, um Wissen zu erwerben, sondern eine lebenslange Reise. Es gibt uns die Fähigkeit,
-                uns anzupassen, zu wachsen und unsere Perspektiven zu erweitern. Egal, ob es darum geht, eine neue Sprache zu lernen,
-                ein Instrument zu beherrschen oder einfach nur die Natur zu erforschen – das Lernen macht das Leben reichhaltiger.
-            </p>
-        </section>
-
-        <section>
-            <h2>Ein inspirierendes Zitat</h2>
             <div class="quote">
-                "Bildung ist die mächtigste Waffe, die du verwenden kannst, um die Welt zu verändern." – Nelson Mandela
+                "Der Geist ist kein Schiff, das beladen werden soll, sondern ein Feuer, das entzündet werden will." – Plutarch
             </div>
         </section>
 
-        <section>
-            <h2>Wie du anfangen kannst</h2>
+        <!-- Wissenschaft -->
+        <section id="wissenschaft">
+            <h2>Die Wunder der Wissenschaft</h2>
             <p>
-                Es war nie einfacher, mit dem Lernen zu beginnen! Lies ein Buch, schaue eine Dokumentation, probiere einen 
-                Online-Kurs aus oder unterhalte dich mit jemandem, der etwas Neues weiß. Der erste Schritt ist immer der wichtigste.
+                Wissenschaft hat unsere Welt revolutioniert. Von medizinischen Durchbrüchen bis hin zu Raumfahrt – sie zeigt, was möglich ist, wenn wir neugierig bleiben und die Welt hinterfragen.
             </p>
+            <div class="cards">
+                <div class="card">
+                    <img src="https://source.unsplash.com/400x300/?space" alt="Raumfahrt">
+                    <h3>Raumfahrt</h3>
+                    <p>Entdecke, wie die Menschheit es geschafft hat, den Weltraum zu erkunden und neue Horizonte zu öffnen.</p>
+                </div>
+                <div class="card">
+                    <img src="https://source.unsplash.com/400x300/?biology" alt="Biologie">
+                    <h3>Biologie</h3>
+                    <p>Verstehe die Mechanismen des Lebens – von Zellen bis zu Ökosystemen.</p>
+                </div>
+                <div class="card">
+                    <img src="https://source.unsplash.com/400x300/?physics" alt="Physik">
+                    <h3>Physik</h3>
+                    <p>Erforsche die Grundgesetze des Universums, die unsere Existenz formen.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Geschichte -->
+        <section id="geschichte">
+            <h2>Geschichte, die inspiriert</h2>
+            <p>
+                Die Vergangenheit gibt uns Einblicke in die Zukunft. Durch das Studium der Geschichte lernen wir von den Erfolgen und Fehlern unserer Vorfahren.
+            </p>
+            <div class="quote">
+                "Wer die Vergangenheit nicht kennt, ist dazu verdammt, sie zu wiederholen." – George Santayana
+            </div>
+        </section>
+
+        <!-- Tipps zum Lernen -->
+        <section id="lernen">
+            <h2>Tipps für effektives Lernen</h2>
+            <p>
+                Lernen muss nicht schwer sein. Hier sind einige Tipps, die dir helfen können, dein Wissen zu erweitern:
+            </p>
+            <ul>
+                <li>Setze dir klare Ziele und bleibe fokussiert.</li>
+                <li>Nutze verschiedene Quellen wie Bücher, Videos und Diskussionen.</li>
+                <li>Verteile dein Lernen in kleinen Abschnitten über mehrere Tage.</li>
+                <li>Mache regelmäßige Pausen, um deinen Geist frisch zu halten.</li>
+            </ul>
         </section>
     </main>
 
+    <!-- Footer -->
     <footer>
-        <p>Erstellt mit Liebe für Wissen und Lernen. © 2024</p>
+        <p>Erstellt mit Leidenschaft für Wissen und Lernen. © 2024</p>
     </footer>
 </body>
 </html>
