@@ -50,7 +50,7 @@
 
         .object {
             position: absolute;
-            font-size: 50px;
+            font-size: 80px;
             cursor: pointer;
         }
 
@@ -122,7 +122,6 @@
                 opacity: 0;
             }
         }
-
     </style>
 </head>
 <body>
@@ -145,6 +144,8 @@
         let skulls = [];
         let bossActive = false;
         let bossMeteor;
+        let bossHealth = 10;
+        let activeCode = null; // Track which code is active
         let aimbotActive = false;
         let godModeActive = false;
         let timerInterval;
@@ -157,6 +158,9 @@
 
         function updateLifeBar() {
             lifeBar.style.width = `${(lives / 5) * 100}%`;
+            if (lives <= 0) {
+                gameOver();
+            }
         }
 
         function createMeteor() {
@@ -169,38 +173,31 @@
             document.body.appendChild(meteor);
 
             meteor.addEventListener("click", function () {
+                createExplosion(meteor);
                 meteor.remove();
             });
 
-            meteors.push(meteor);
-
             setTimeout(() => {
-                meteor.remove();
+                if (!meteor.removed) {
+                    if (!godModeActive) {
+                        lives--;
+                        updateLifeBar();
+                    }
+                    meteor.remove();
+                }
             }, 5000);
         }
 
-        function createSkull() {
-            const skull = document.createElement("div");
-            skull.classList.add("skull");
-            skull.textContent = "☠️";
-            skull.style.position = "absolute";
-            skull.style.left = `${Math.random() * 90}vw`;
-            skull.style.top = "-50px";
-            document.body.appendChild(skull);
-
-            skull.addEventListener("click", function () {
-                if (!godModeActive) {
-                    lives -= 1;
-                    updateLifeBar();
-                }
-                skull.remove();
-            });
-
-            skulls.push(skull);
+        function createExplosion(meteor) {
+            const explosion = document.createElement("div");
+            explosion.classList.add("explosion");
+            explosion.style.left = meteor.offsetLeft + "px";
+            explosion.style.top = meteor.offsetTop + "px";
+            document.body.appendChild(explosion);
 
             setTimeout(() => {
-                skull.remove();
-            }, 5000);
+                explosion.remove();
+            }, 500);
         }
 
         function spawnMeteors() {
@@ -211,65 +208,27 @@
             }, 2000);
         }
 
-        function spawnSkulls() {
-            setInterval(() => {
-                if (!bossActive) {
-                    createSkull();
-                }
-            }, 3000);
-        }
-
         function submitCode() {
             const code = document.getElementById("code-input").value.trim();
+
+            // Check if a code is already active
+            if (activeCode) {
+                alert("Ein Code ist bereits aktiv. Bitte warte, bis der Effekt endet.");
+                return;
+            }
+
             if (code === "AboFluesterer") {
+                activeCode = "aimbot";
                 activateAimbot();
             } else if (code === "100373") {
+                activeCode = "boss";
                 spawnBossMeteor();
             } else if (code === "G O D") {
+                activeCode = "godmode";
                 activateGodMode();
             } else {
                 alert("Ungültiger Code!");
             }
-        }
-
-        function activateAimbot() {
-            if (aimbotActive) {
-                alert("Aimbot wurde bereits aktiviert!");
-                return;
-            }
-
-            aimbotActive = true;
-            timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
-            timerInterval = setInterval(() => {
-                aimbotTimer--;
-                timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
-
-                if (aimbotTimer === 0) {
-                    clearInterval(timerInterval);
-                    aimbotActive = false;
-                    timerElement.textContent = "";
-                }
-            }, 1000);
-        }
-
-        function activateGodMode() {
-            if (godModeActive) {
-                alert("Godmode wurde bereits aktiviert!");
-                return;
-            }
-
-            godModeActive = true;
-            timerElement.textContent = `Godmode: ${godModeTimer}s`;
-            timerInterval = setInterval(() => {
-                godModeTimer--;
-                timerElement.textContent = `Godmode: ${godModeTimer}s`;
-
-                if (godModeTimer === 0) {
-                    clearInterval(timerInterval);
-                    godModeActive = false;
-                    timerElement.textContent = "";
-                }
-            }, 1000);
         }
 
         function spawnBossMeteor() {
@@ -281,26 +240,80 @@
             bossMeteor.textContent = "☄️";
             bossMeteor.style.width = "200px";
             bossMeteor.style.height = "200px";
+            bossMeteor.style.fontSize = "150px";
             bossMeteor.style.position = "absolute";
             bossMeteor.style.top = "10vh";
             bossMeteor.style.left = "40vw";
+            bossMeteor.style.transition = "all 0.5s";
+            bossMeteor.style.cursor = "pointer";
 
             document.body.appendChild(bossMeteor);
 
+            bossMeteor.addEventListener("click", function () {
+                bossHealth--;
+                if (bossHealth > 0) {
+                    bossMeteor.style.left = `${Math.random() * 80}vw`;
+                    bossMeteor.style.top = `${Math.random() * 80}vh`;
+                } else {
+                    bossMeteor.remove();
+                    bossActive = false;
+                    activeCode = null; // Reset active code
+                }
+            });
+
             setTimeout(() => {
-                bossMeteor.remove();
-                bossActive = false;
+                if (bossHealth > 0) {
+                    bossMeteor.remove();
+                    bossActive = false;
+                    activeCode = null; // Reset active code
+                }
             }, 15000);
+        }
+
+        function activateAimbot() {
+            aimbotActive = true;
+            timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
+            timerInterval = setInterval(() => {
+                aimbotTimer--;
+                timerElement.textContent = `Aimbot: ${aimbotTimer}s`;
+
+                if (aimbotTimer === 0) {
+                    clearInterval(timerInterval);
+                    aimbotActive = false;
+                    timerElement.textContent = "";
+                    activeCode = null; // Reset active code
+                }
+            }, 1000);
+        }
+
+        function activateGodMode() {
+            godModeActive = true;
+            timerElement.textContent = `Godmode: ${godModeTimer}s`;
+            timerInterval = setInterval(() => {
+                godModeTimer--;
+                timerElement.textContent = `Godmode: ${godModeTimer}s`;
+
+                if (godModeTimer === 0) {
+                    clearInterval(timerInterval);
+                    godModeActive = false;
+                    timerElement.textContent = "";
+                    activeCode = null; // Reset active code
+                }
+            }, 1000);
         }
 
         function showSecretCode() {
             secretCode.style.display = "block";
         }
 
+        function gameOver() {
+            document.getElementById("game-over").style.display = "block";
+            document.getElementById("try-again").style.display = "block";
+        }
+
         window.onload = () => {
             updateLifeBar();
             spawnMeteors();
-            spawnSkulls();
         };
     </script>
 </body>
