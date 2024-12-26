@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coding Forum</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
     <style>
         body {
             background-color: #121212;
@@ -52,6 +58,14 @@
 <body>
     <div class="container">
         <h1>Willkommen im Coding Forum</h1>
+
+        <!-- Anmeldung -->
+        <input type="email" id="email" placeholder="E-Mail" required>
+        <input type="password" id="password" placeholder="Passwort" required>
+        <button onclick="register()">Registrieren</button>
+        <button onclick="login()">Einloggen</button>
+
+        <!-- Kommentar Formular -->
         <input type="text" id="nickname" placeholder="Gib deinen Nickname ein" required>
         <textarea id="comment" placeholder="Schreibe deinen Kommentar..." required></textarea>
         <div class="captcha">
@@ -59,58 +73,81 @@
             <input type="number" id="captcha" required>
         </div>
         <button onclick="postComment()">Posten</button>
+
         <div id="comments"></div>
     </div>
 
     <script>
-        const bannedUsers = ['fluesterer'];  // Liste der gesperrten Benutzernamen
-        const bannedWords = ['fick dich', 'fuck', 'shit'];  // Filter für ungewünschte Wörter
+        // Firebase-Konfiguration
+        const firebaseConfig = {
+            apiKey: "DEIN_API_KEY",
+            authDomain: "DEIN_AUTH_DOMAIN",
+            projectId: "DEIN_PROJECT_ID",
+            storageBucket: "DEIN_STORAGE_BUCKET",
+            messagingSenderId: "DEIN_MESSAGING_SENDER_ID",
+            appId: "DEIN_APP_ID",
+            measurementId: "DEIN_MEASUREMENT_ID"
+        };
 
-        // Setze das Kommentar-Delay
+        // Firebase initialisieren
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const bannedUsers = ['fluesterer']; // Liste der gesperrten Benutzernamen
+        const bannedWords = ['fick dich', 'fuck', 'shit']; // Filter für ungewünschte Wörter
+
         let lastPostTime = 0; // Zeit des letzten Kommentars
 
-        // Lade Kommentare und Nickname
-        function loadComments() {
-            const comments = JSON.parse(localStorage.getItem('comments')) || [];
+        // Registrierung eines neuen Benutzers
+        async function register() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                alert("Registrierung erfolgreich!");
+            } catch (error) {
+                alert("Fehler bei der Registrierung: " + error.message);
+            }
+        }
+
+        // Benutzeranmeldung
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                alert("Erfolgreich eingeloggt!");
+            } catch (error) {
+                alert("Fehler bei der Anmeldung: " + error.message);
+            }
+        }
+
+        // Laden der Kommentare aus Firestore
+        async function loadComments() {
             const commentsDiv = document.getElementById('comments');
-            commentsDiv.innerHTML = ''; // Leere die Liste der Kommentare
+            commentsDiv.innerHTML = ''; // Leeren der Liste der Kommentare
 
-            comments.forEach(comment => {
-                const div = document.createElement('div');
-                div.classList.add('comment');
-                if (comment.isBanned) {
-                    div.classList.add('banned');
-                }
-                div.innerHTML = `<strong>${comment.nickname}</strong>: <p>${comment.text}</p> <button onclick="deleteComment('${comment.nickname}')">Löschen</button>`;
-                commentsDiv.appendChild(div);
-            });
+            try {
+                const querySnapshot = await db.collection("comments").orderBy("createdAt", "desc").get();
+                querySnapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const div = document.createElement('div');
+                    div.classList.add('comment');
+                    if (comment.isBanned) {
+                        div.classList.add('banned');
+                    }
+                    div.innerHTML = `<strong>${comment.username}</strong>: <p>${comment.text}</p>`;
+                    commentsDiv.appendChild(div);
+                });
+            } catch (error) {
+                alert("Fehler beim Laden der Kommentare: " + error.message);
+            }
         }
 
-        // Speichern der Kommentare
-        function saveComment(nickname, commentText) {
-            const comments = JSON.parse(localStorage.getItem('comments')) || [];
-            comments.push({ nickname, text: commentText, isBanned: false });
-            localStorage.setItem('comments', JSON.stringify(comments));
-        }
-
-        // Überprüfe auf verbotene Wörter
-        function containsBannedWords(text) {
-            return bannedWords.some(word => text.toLowerCase().includes(word));
-        }
-
-        // Überprüfe, ob der Nickname "fluesterer" verwendet wird
-        function isNicknameReserved(nickname) {
-            return nickname.toLowerCase() === 'fluesterer';
-        }
-
-        // Überprüfe, ob das Captcha korrekt ist
-        function isCaptchaCorrect() {
-            const captchaInput = document.getElementById('captcha').value;
-            return captchaInput == 8; // Antwort auf "Was ist 3 + 5?" ist 8
-        }
-
-        // Kommentarfunktion
-        function postComment() {
+        // Kommentar posten
+        async function postComment() {
+            const user = auth.currentUser;
             const nickname = document.getElementById('nickname').value;
             const commentText = document.getElementById('comment').value;
 
@@ -121,36 +158,39 @@
             }
 
             // Verhindere Spam und Captcha Überprüfung
-            if (!isCaptchaCorrect()) {
+            if (document.getElementById('captcha').value != 8) {
                 alert('Captcha ist falsch! Bitte versuche es erneut.');
                 return;
             }
 
-            if (containsBannedWords(commentText)) {
+            // Überprüfe verbotene Wörter und gesperrte Benutzernamen
+            if (bannedWords.some(word => commentText.toLowerCase().includes(word))) {
                 alert('Dein Kommentar enthält verbotene Wörter!');
                 return;
             }
-
-            if (isNicknameReserved(nickname)) {
-                alert('Der Nickname "fluesterer" ist nur für den Admin reserviert!');
+            if (bannedUsers.includes(nickname.toLowerCase())) {
+                alert('Dieser Benutzername ist gesperrt!');
                 return;
             }
 
-            // Speichern des Kommentars
-            saveComment(nickname, commentText);
-            lastPostTime = currentTime; // Setze die Zeit des letzten Posts
-            loadComments(); // Lade die Kommentare neu
+            // Kommentar speichern in Firestore
+            try {
+                await db.collection("comments").add({
+                    username: nickname,
+                    text: commentText,
+                    userId: user.uid,  // Speichert die User-ID des eingeloggten Benutzers
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isBanned: false // Optional, kannst du anpassen, um Kommentare von gebannten Nutzern zu filtern
+                });
+                alert("Kommentar erfolgreich gepostet!");
+                loadComments(); // Kommentare neu laden
+                lastPostTime = currentTime;
+            } catch (error) {
+                alert("Fehler beim Posten des Kommentars: " + error.message);
+            }
         }
 
-        // Löschen eines Kommentars
-        function deleteComment(nickname) {
-            const comments = JSON.parse(localStorage.getItem('comments')) || [];
-            const updatedComments = comments.filter(comment => comment.nickname !== nickname);
-            localStorage.setItem('comments', JSON.stringify(updatedComments));
-            loadComments(); // Kommentare neu laden
-        }
-
-        window.onload = loadComments;
+        window.onload = loadComments; // Kommentare beim Laden der Seite anzeigen
     </script>
 </body>
 </html>
