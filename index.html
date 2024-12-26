@@ -1,205 +1,118 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meteoriten-Spiel</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #FFF;
-            margin: 0;
-            overflow: hidden;
-        }
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 80vh;
-            background-color: #2C3E50;
-            overflow: hidden;
-        }
-        .meteor {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-image: url('https://i.imgur.com/nsqaual.jpeg');
-            background-size: cover;
-            animation: fall linear 3s;
-        }
-        @keyframes fall {
-            0% { top: -50px; }
-            100% { top: 100%; }
-        }
-        #control-panel {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .input-field, .btn {
-            padding: 10px;
-            font-size: 1em;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-        }
-        .btn {
-            background-color: #27AE60;
-            color: white;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background-color: #2ECC71;
-        }
-        #gameover-screen {
-            display: none;
-            text-align: center;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome Dino Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f5f5f5;
+    }
+    #gameCanvas {
+      background-color: #fff;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
 </head>
 <body>
-    <h1>Meteoriten-Spiel</h1>
-    <div id="game-container"></div>
-    <div id="control-panel">
-        <input type="number" id="guess" class="input-field" placeholder="Errate die Zahl (1-12)" min="1" max="12">
-        <button class="btn" onclick="checkGuess()">Bestätigen</button>
-        <input type="text" id="secret-code" class="input-field" placeholder="Geheimer Code">
-        <button class="btn" onclick="useSecretCode()">Code verwenden</button>
-        <p id="feedback"></p>
-        <p>Punkte: <span id="score">0</span></p>
-    </div>
-    <div id="gameover-screen" class="hidden">
-        <h2>Game Over!</h2>
-        <p id="final-score"></p>
-        <p id="rating"></p>
-        <button class="btn" onclick="restartGame()">Try Again</button>
-    </div>
+  <canvas id="gameCanvas"></canvas>
 
-    <script>
-        let score = 0;
-        let round = 0;
-        let gameOver = false;
-        let allowlist = false;
-        let showAlways = false;
-        let secretUsed = {
-            "AboFluesterer": false,
-            "G O D": false,
-            "showall": false
-        };
-        let meteorInterval;
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const dinoHeight = 50;
+    const dinoWidth = 50;
+    const dinoSpeed = 5;
 
-        function startGame() {
-            spawnMeteor();
-            meteorInterval = setInterval(spawnMeteor, 3000);
+    let dinoY = canvas.height - dinoHeight;
+    let dinoX = 50;
+    let isJumping = false;
+    let jumpHeight = 0;
+    let gravity = 0.8;
+    let jumpStrength = 20;
+
+    let cactusWidth = 20;
+    let cactusHeight = 40;
+    let cactusX = canvas.width;
+    let cactusSpeed = 5;
+
+    function setUpCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function drawDino() {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(dinoX, dinoY - jumpHeight, dinoWidth, dinoHeight);
+    }
+
+    function drawCactus() {
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(cactusX, canvas.height - cactusHeight, cactusWidth, cactusHeight);
+    }
+
+    function moveCactus() {
+      cactusX -= cactusSpeed;
+      if (cactusX + cactusWidth < 0) {
+        cactusX = canvas.width;
+      }
+    }
+
+    function jump() {
+      if (isJumping) {
+        jumpHeight += jumpStrength;
+        if (jumpHeight >= 100) {
+          isJumping = false;
         }
-
-        function spawnMeteor() {
-            const container = document.getElementById('game-container');
-            const meteor = document.createElement('div');
-            meteor.classList.add('meteor');
-            const targetNumber = Math.floor(Math.random() * 12) + 1;
-            meteor.dataset.target = targetNumber;
-            meteor.style.left = `${Math.random() * 90}%`;
-            container.appendChild(meteor);
-
-            setTimeout(() => {
-                container.removeChild(meteor);
-                if (!gameOver) checkMiss(targetNumber);
-            }, 3000);
+      } else {
+        if (jumpHeight > 0) {
+          jumpHeight -= gravity;
+        } else {
+          jumpHeight = 0;
         }
+      }
+    }
 
-        function checkGuess() {
-            if (gameOver) return;
-            const guess = parseInt(document.getElementById('guess').value);
-            const meteors = document.querySelectorAll('.meteor');
+    function detectCollision() {
+      if (
+        dinoX + dinoWidth > cactusX &&
+        dinoX < cactusX + cactusWidth &&
+        dinoY - jumpHeight + dinoHeight > canvas.height - cactusHeight
+      ) {
+        alert('Game Over');
+        resetGame();
+      }
+    }
 
-            let hit = false;
-            meteors.forEach(meteor => {
-                if (parseInt(meteor.dataset.target) === guess) {
-                    hit = true;
-                    meteor.remove();
-                }
-            });
+    function resetGame() {
+      dinoY = canvas.height - dinoHeight;
+      dinoX = 50;
+      cactusX = canvas.width;
+      jumpHeight = 0;
+    }
 
-            if (hit || showAlways) {
-                score += 10;
-                round++;
-                document.getElementById('feedback').textContent = "Richtig geraten!";
-            } else {
-                document.getElementById('feedback').textContent = "Falsch geraten! Game Over!";
-                endGame();
-            }
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawDino();
+      drawCactus();
+      moveCactus();
+      jump();
+      detectCollision();
+      requestAnimationFrame(gameLoop);
+    }
 
-            document.getElementById('score').textContent = score;
-        }
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !isJumping) {
+        isJumping = true;
+      }
+    });
 
-        function checkMiss(targetNumber) {
-            if (!showAlways) {
-                document.getElementById('feedback').textContent = `Der Meteorit hat die Zahl ${targetNumber} getroffen.`;
-                endGame();
-            }
-        }
-
-        function endGame() {
-            gameOver = true;
-            clearInterval(meteorInterval);
-            document.getElementById('control-panel').classList.add('hidden');
-            document.getElementById('gameover-screen').classList.remove('hidden');
-            document.getElementById('final-score').textContent = `Punkte: ${score}`;
-            document.getElementById('rating').textContent = `Bewertung: ${getRating()}`;
-        }
-
-        function getRating() {
-            if (round >= 5) return "A+";
-            if (round >= 4) return "A";
-            if (round >= 3) return "B";
-            if (round >= 2) return "C";
-            if (round >= 1) return "D";
-            return "F-";
-        }
-
-        function restartGame() {
-            score = 0;
-            round = 0;
-            gameOver = false;
-            document.getElementById('control-panel').classList.remove('hidden');
-            document.getElementById('gameover-screen').classList.add('hidden');
-            document.getElementById('score').textContent = score;
-            startGame();
-        }
-
-        function useSecretCode() {
-            const code = document.getElementById('secret-code').value.trim();
-
-            if (code === "allowlistaddFluesterer") {
-                allowlist = true;
-                document.getElementById('feedback').textContent = "Du bist jetzt auf der Allowlist!";
-                return;
-            }
-
-            if (code === "showall" && allowlist) {
-                showAlways = true;
-                document.getElementById('feedback').textContent = "Geheimer Modus aktiviert: Zahlen werden immer angezeigt.";
-                return;
-            }
-
-            if (code === "AboFluesterer" && !secretUsed["AboFluesterer"]) {
-                secretUsed["AboFluesterer"] = true;
-                document.getElementById('feedback').textContent = "Die nächste Zahl ist garantiert richtig!";
-                showAlways = true;
-                return;
-            }
-
-            document.getElementById('feedback').textContent = "Dieser Code existiert nicht oder wurde bereits verwendet!";
-        }
-
-        startGame();
-    </script>
+    setUpCanvas();
+    gameLoop();
+  </script>
 </body>
 </html>
