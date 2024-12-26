@@ -3,220 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Hand vs. Chips</title>
+    <title>Wissen und Lernen</title>
     <style>
         body {
             margin: 0;
-            overflow: hidden;
-            background-color: #d0f0f8; /* Himmelblauer Hintergrund */
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(to right, #f0f8ff, #dbefff);
+            color: #333;
         }
-        canvas {
-            display: block;
+
+        header {
+            background: #00509e;
+            color: white;
+            padding: 20px 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 1.2em;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        section {
+            margin-bottom: 20px;
+        }
+
+        section h2 {
+            color: #00509e;
+            border-left: 5px solid #00509e;
+            padding-left: 10px;
+        }
+
+        section p {
+            text-align: justify;
+        }
+
+        .quote {
+            background: #f0f8ff;
+            border-left: 5px solid #00509e;
+            padding: 10px 15px;
+            font-style: italic;
+            margin: 20px 0;
+        }
+
+        footer {
+            background: #00509e;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <header>
+        <h1>Wissen und Lernen</h1>
+        <p>Die Reise des Wissens hört niemals auf.</p>
+    </header>
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    <main>
+        <section>
+            <h2>Warum Wissen wichtig ist</h2>
+            <p>
+                Wissen ist die Grundlage für Fortschritt und Innovation. Es hilft uns, die Welt um uns herum besser zu verstehen,
+                Probleme zu lösen und neue Möglichkeiten zu entdecken. Vom Lesen eines Buches bis hin zu wissenschaftlichen 
+                Durchbrüchen – Wissen treibt uns an, größer zu denken und weiter zu gehen.
+            </p>
+        </section>
 
-        let gameOver = false;
-        let score = 0;
-        let bestScore = localStorage.getItem('bestScore') || 0;
+        <section>
+            <h2>Der Wert des Lernens</h2>
+            <p>
+                Lernen ist nicht nur ein Prozess, um Wissen zu erwerben, sondern eine lebenslange Reise. Es gibt uns die Fähigkeit,
+                uns anzupassen, zu wachsen und unsere Perspektiven zu erweitern. Egal, ob es darum geht, eine neue Sprache zu lernen,
+                ein Instrument zu beherrschen oder einfach nur die Natur zu erforschen – das Lernen macht das Leben reichhaltiger.
+            </p>
+        </section>
 
-        // Hand (Player)
-        const hand = {
-            x: 100,
-            y: canvas.height / 2,
-            width: 40, // Kleinere Breite
-            height: 40, // Kleinere Höhe
-            velocity: 0,
-            gravity: 0.6,
-            jumpStrength: -10,
-            color: '#8b4513'
-        };
+        <section>
+            <h2>Ein inspirierendes Zitat</h2>
+            <div class="quote">
+                "Bildung ist die mächtigste Waffe, die du verwenden kannst, um die Welt zu verändern." – Nelson Mandela
+            </div>
+        </section>
 
-        // Chips
-        const chips = {
-            x: canvas.width - 100, // Näher am Rand
-            y: Math.random() * (canvas.height - 100),
-            width: 30, // Kleinere Größe
-            height: 30,
-            color: '#FFD700'
-        };
+        <section>
+            <h2>Wie du anfangen kannst</h2>
+            <p>
+                Es war nie einfacher, mit dem Lernen zu beginnen! Lies ein Buch, schaue eine Dokumentation, probiere einen 
+                Online-Kurs aus oder unterhalte dich mit jemandem, der etwas Neues weiß. Der erste Schritt ist immer der wichtigste.
+            </p>
+        </section>
+    </main>
 
-        // Obstacles (Tische)
-        let obstacles = [];
-        const obstacleFrequency = 2000; // in ms
-        const gapHeight = 120; // Kleinere Lücke
-        const obstacleWidth = 70; // Kleinere Hindernisbreite
-
-        function createObstacle() {
-            const topHeight = Math.random() * (canvas.height - gapHeight - 100) + 50;
-            obstacles.push({
-                x: canvas.width,
-                y: 0,
-                width: obstacleWidth,
-                height: topHeight,
-                color: '#2e8b57',
-                isTop: true
-            });
-            obstacles.push({
-                x: canvas.width,
-                y: topHeight + gapHeight,
-                width: obstacleWidth,
-                height: canvas.height - topHeight - gapHeight,
-                color: '#2e8b57',
-                isTop: false
-            });
-        }
-
-        function moveHand() {
-            hand.velocity += hand.gravity;
-            hand.y += hand.velocity;
-
-            // Check if hand hits the ground or ceiling
-            if (hand.y < 0 || hand.y + hand.height > canvas.height) {
-                gameOver = true;
-            }
-        }
-
-        function moveObstacles() {
-            obstacles.forEach(obstacle => {
-                obstacle.x -= 5;
-            });
-
-            // Remove obstacles that move off the screen
-            obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
-        }
-
-        function checkCollisions() {
-            // Check collision with obstacles
-            obstacles.forEach(obstacle => {
-                if (
-                    hand.x < obstacle.x + obstacle.width &&
-                    hand.x + hand.width > obstacle.x &&
-                    hand.y < obstacle.y + obstacle.height &&
-                    hand.y + hand.height > obstacle.y
-                ) {
-                    gameOver = true;
-                }
-            });
-
-            // Check if hand collects chips
-            if (
-                hand.x < chips.x + chips.width &&
-                hand.x + hand.width > chips.x &&
-                hand.y < chips.y + chips.height &&
-                hand.y + hand.height > chips.y
-            ) {
-                score++;
-                if (score > bestScore) {
-                    bestScore = score;
-                    localStorage.setItem('bestScore', bestScore);
-                }
-
-                // Respawn chips
-                chips.x = canvas.width - 100;
-                chips.y = Math.random() * (canvas.height - 100);
-            }
-        }
-
-        function drawHand() {
-            ctx.fillStyle = hand.color;
-            ctx.fillRect(hand.x, hand.y, hand.width, hand.height);
-        }
-
-        function drawChips() {
-            ctx.fillStyle = chips.color;
-            ctx.beginPath();
-            ctx.arc(chips.x + chips.width / 2, chips.y + chips.height / 2, chips.width / 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        function drawObstacles() {
-            obstacles.forEach(obstacle => {
-                ctx.fillStyle = obstacle.color;
-                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-            });
-        }
-
-        function drawBackground() {
-            // Sky
-            ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Ground
-            ctx.fillStyle = '#228B22';
-            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-        }
-
-        function drawScore() {
-            ctx.fillStyle = 'black';
-            ctx.font = '20px Arial';
-            ctx.fillText(`Score: ${score}`, 20, 30);
-            ctx.fillText(`Best Score: ${bestScore}`, 20, 60);
-        }
-
-        function drawGameOver() {
-            ctx.fillStyle = 'red';
-            ctx.font = '40px Arial';
-            ctx.fillText('Game Over!', canvas.width / 2 - 100, canvas.height / 2 - 20);
-            ctx.font = '20px Arial';
-            ctx.fillText('Tap to Restart', canvas.width / 2 - 70, canvas.height / 2 + 20);
-        }
-
-        function update() {
-            if (gameOver) {
-                drawGameOver();
-                return;
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawBackground();
-            moveHand();
-            moveObstacles();
-            checkCollisions();
-
-            drawHand();
-            drawChips();
-            drawObstacles();
-            drawScore();
-
-            chips.x -= 5; // Move chips to the left
-            if (chips.x + chips.width < 0) {
-                // Respawn chips if they move off-screen
-                chips.x = canvas.width - 100;
-                chips.y = Math.random() * (canvas.height - 100);
-            }
-
-            requestAnimationFrame(update);
-        }
-
-        // Touch control
-        canvas.addEventListener('touchstart', () => {
-            if (gameOver) {
-                // Restart the game
-                gameOver = false;
-                score = 0;
-                hand.y = canvas.height / 2;
-                hand.velocity = 0;
-                obstacles = [];
-                update();
-            } else {
-                // Jump
-                hand.velocity = hand.jumpStrength;
-            }
-        });
-
-        // Start game
-        setInterval(createObstacle, obstacleFrequency);
-        update();
-    </script>
+    <footer>
+        <p>Erstellt mit Liebe für Wissen und Lernen. © 2024</p>
+    </footer>
 </body>
 </html>
