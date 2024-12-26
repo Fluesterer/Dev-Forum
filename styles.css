@@ -1,0 +1,80 @@
+/* ====================================
+   Global Styles
+==================================== */
+body {
+    background-color: #121212;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ====================================
+   Container
+==================================== */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+
+/* ====================================
+   Form Elements
+==================================== */
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #333;
+    color: white;
+    box-sizing: border-box;
+}
+
+/* ====================================
+   Buttons
+==================================== */
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* ====================================
+   Comments Section
+==================================== */
+.comment {
+    background-color: #444;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+/* ====================================
+   Captcha Section
+==================================== */
+.captcha {
+    font-size: 16px;
+    color: white;
+    margin: 10px 0;
+}
+
+/* ====================================
+   Banned Users
+==================================== */
+.banned {
+    background-color: red;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
